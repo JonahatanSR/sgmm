@@ -1,0 +1,90 @@
+version: '3.7'
+
+services:
+  # Base de datos (misma config que producción)
+  postgres:
+    image: postgres:15
+    container_name: sgmm_postgres_dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sgmm_db
+      POSTGRES_USER: sgmm_user
+      POSTGRES_PASSWORD: sgmm_password_2024
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sgmm_user -d sgmm_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Cache (misma config que producción)
+  redis:
+    image: redis:7-alpine
+    container_name: sgmm_redis_dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Backend en modo desarrollo (hot reload)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: sgmm_backend_dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./backend/.env.docker
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./backend/src:/app/src:ro
+      - ./backend/prisma:/app/prisma:ro
+      - uploads_dev_data:/app/uploads
+      - logs_dev_data:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Frontend en modo desarrollo (hot reload)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: sgmm_frontend_dev
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./frontend/src:/app/src:ro
+      - ./frontend/public:/app/public:ro
+      - ./frontend/vite.config.ts:/app/vite.config.ts:ro
+      - ./frontend/postcss.config.js:/app/postcss.config.js:ro
+      - ./frontend/tailwind.config.js:/app/tailwind.config.js:ro
+    depends_on:
+      - backend
+
+volumes:
+  postgres_dev_data:
+  redis_dev_data:
+  uploads_dev_data:
+  logs_dev_data:
+
+networks:
+  default:
+    name: sgmm_network_dev

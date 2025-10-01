@@ -1,0 +1,321 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// CORE ENTITIES - Sistema SGMM
+// ============================================================================
+
+model Company {
+  id                String   @id @default(cuid())
+  name              String
+  code              String   @unique // "SR", "WP"
+  logo_url          String?
+  favicon_url       String?
+  primary_color     String   @default("#1f2937")
+  secondary_color   String   @default("#374151")
+  accent_color      String   @default("#3b82f6")
+  neutral_color     String   @default("#6b7280")
+  font_primary      String   @default("Arial")
+  font_secondary    String   @default("Arial")
+  custom_css        String?
+  active            Boolean  @default(true)
+  brand_updated_at  DateTime?
+  brand_updated_by  String?
+  created_at        DateTime @default(now())
+
+  // Relations
+  employees         Employee[]
+  admin_users       AdminUser[]
+  email_templates   EmailTemplate[]
+  email_campaigns   EmailCampaign[]
+  pdf_templates     PDFTemplate[]
+
+  @@map("companies")
+}
+
+model Employee {
+  id                  String        @id @default(cuid())
+  google_id           String?       @unique
+  employee_number     String        @unique
+  email               String        @unique
+  full_name           String
+  first_name          String?
+  paternal_last_name  String?
+  maternal_last_name  String?
+  birth_date          DateTime?
+  gender              Gender?
+  hire_date           DateTime
+  company_id          String
+  department          String?
+  position            String?
+  org_unit_path       String?
+  policy_number       String?
+  status              EmployeeStatus @default(ACTIVE)
+  created_at          DateTime      @default(now())
+  updated_at          DateTime      @updatedAt
+
+  // Relations
+  company             Company       @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  dependents          Dependent[]
+  documents           Document[]
+  audit_logs          AuditLog[]
+
+  @@map("employees")
+}
+
+model Dependent {
+  id                  String           @id @default(cuid())
+  dependent_id        String           @unique
+  dependent_seq       Int
+  employee_id         String
+  first_name          String
+  paternal_last_name  String
+  maternal_last_name  String?
+  birth_date          DateTime
+  gender              Gender
+  relationship_type_id Int
+  policy_start_date   DateTime
+  policy_end_date     DateTime?
+  deleted_at          DateTime?
+  status              DependentStatus  @default(ACTIVE)
+  created_at          DateTime         @default(now())
+  updated_at          DateTime         @updatedAt
+
+  // Relations
+  employee            Employee         @relation(fields: [employee_id], references: [id], onDelete: Cascade)
+  relationship_type   RelationshipType @relation(fields: [relationship_type_id], references: [id])
+  documents           Document[]
+
+  @@map("dependents")
+  @@index([employee_id, dependent_seq])
+}
+
+model RelationshipType {
+  id            Int         @id @default(autoincrement())
+  name          String      @unique
+  display_order Int         @default(0)
+  active        Boolean     @default(true)
+
+  // Relations
+  dependents    Dependent[]
+
+  @@map("relationship_types")
+}
+
+model Document {
+  id                String       @id @default(cuid())
+  employee_id       String
+  dependent_id      String?
+  document_type     DocumentType
+  original_filename String
+  stored_filename   String
+  file_path         String
+  file_size         Int
+  mime_type         String
+  upload_ip         String
+  uploaded_at       DateTime     @default(now())
+
+  // Relations
+  employee          Employee     @relation(fields: [employee_id], references: [id], onDelete: Cascade)
+  dependent         Dependent?   @relation(fields: [dependent_id], references: [id], onDelete: Cascade)
+
+  @@map("documents")
+}
+
+// ============================================================================
+// SYSTEM ENTITIES - Administración
+// ============================================================================
+
+model AdminUser {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  role            UserRole
+  company_id      String?
+  otp_secret      String?
+  otp_enabled     Boolean   @default(false)
+  last_login      DateTime?
+  failed_attempts Int       @default(0)
+  locked_until    DateTime?
+  active          Boolean   @default(true)
+  created_by      String?
+  created_at      DateTime  @default(now())
+
+  // Relations
+  company         Company?  @relation(fields: [company_id], references: [id], onDelete: SetNull)
+
+  @@map("admin_users")
+}
+
+model SystemConfig {
+  key               String    @id
+  value             String
+  description       String
+  value_type        ValueType @default(STRING)
+  updatable_by_role UserRole  @default(SUPER_ADMIN)
+  updated_at        DateTime  @updatedAt
+  updated_by        String
+
+  @@map("system_config")
+}
+
+model AuditLog {
+  id          String      @id @default(cuid())
+  user_id     String
+  user_role   UserRole
+  action      AuditAction
+  table_name  String
+  record_id   String
+  old_values  Json?
+  new_values  Json?
+  ip_address  String
+  user_agent  String
+  timestamp   DateTime    @default(now())
+
+  // Relations
+  employee    Employee?   @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}
+
+// ============================================================================
+// COMMUNICATION ENTITIES
+// ============================================================================
+
+model EmailTemplate {
+  id           String              @id @default(cuid())
+  company_id   String
+  name         String
+  category     EmailCategory
+  subject      String
+  body_html    String
+  body_text    String
+  variables    Json
+  active       Boolean             @default(true)
+  created_by   String
+  created_at   DateTime            @default(now())
+
+  // Relations
+  company      Company             @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  campaigns    EmailCampaign[]
+
+  @@map("email_templates")
+}
+
+model EmailCampaign {
+  id                  String              @id @default(cuid())
+  company_id          String
+  template_id         String
+  name                String
+  recipient_criteria  Json
+  scheduled_at        DateTime?
+  sent_at             DateTime?
+  status              EmailCampaignStatus @default(DRAFT)
+  total_recipients    Int                 @default(0)
+  emails_sent         Int                 @default(0)
+  emails_failed       Int                 @default(0)
+  created_by          String
+  created_at          DateTime            @default(now())
+
+  // Relations
+  company             Company             @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  template            EmailTemplate       @relation(fields: [template_id], references: [id])
+
+  @@map("email_campaigns")
+}
+
+// ============================================================================
+// PDF ENTITIES
+// ============================================================================
+
+model PDFTemplate {
+  id            String       @id @default(cuid())
+  company_id    String
+  template_type PDFType
+  name          String
+  config_json   Json
+  custom_css    String?
+  header_config Json
+  footer_config Json
+  version       Int          @default(1)
+  active        Boolean      @default(true)
+  created_by    String
+  created_at    DateTime     @default(now())
+
+  // Relations
+  company       Company      @relation(fields: [company_id], references: [id], onDelete: Cascade)
+
+  @@map("pdf_templates")
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum Gender {
+  M
+  F
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum DependentStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum UserRole {
+  EMPLOYEE
+  HR_ADMIN
+  SUPER_ADMIN
+}
+
+enum DocumentType {
+  BIRTH_CERTIFICATE
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+}
+
+enum EmailCategory {
+  REMINDER
+  NOTIFICATION
+  CAMPAIGN
+}
+
+enum EmailCampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+enum PDFType {
+  EMPLOYEE_REPORT
+  RENEWAL_FORM
+}
+
+enum ValueType {
+  STRING
+  NUMBER
+  BOOLEAN
+  DATE
+}
