@@ -9,6 +9,7 @@ Implementar un sistema SGMM funcional, escalable y mantenible siguiendo arquitec
 
 ### 1. METODOLOGÍA DE BLOQUES DE TRABAJO
 - **BLOQUES ATÓMICOS**: Unidades de trabajo completas de 30-90 minutos
+- **REVISIÓN OBLIGATORIA**: Consultar fuentes de verdad ANTES de iniciar cada bloque
 - **VALIDACIÓN POR BLOQUE**: Validación rápida al finalizar cada bloque (5-10 min)
 - **CERO DEUDA TÉCNICA**: Resolver problemas críticos inmediatamente
 - **DOCUMENTACIÓN INLINE**: Comentarios en código + actualización de README
@@ -25,7 +26,25 @@ Implementar un sistema SGMM funcional, escalable y mantenible siguiendo arquitec
 - **VALIDAR CON GATES**: Ejecutar validaciones antes de aceptar cambios
 - **ANÁLISIS FORENSE**: Investigar causa raíz antes de implementar soluciones
 
-### 3. DOCUMENTACIÓN COMO FUENTE DE VERDAD
+### 3. REVISIÓN OBLIGATORIA DE FUENTES DE VERDAD (ANTES DE CADA BLOQUE)
+
+#### **CHECKLIST OBLIGATORIO AL INICIO DE CADA BLOQUE**:
+- [ ] **DATA_DICTIONARY.md**: Revisar campos, tipos, restricciones y reglas de negocio
+- [ ] **DATABASE_SCHEMA_COMPLETE.md**: Validar estructura de tablas y relaciones
+- [ ] **NAMING_CONVENTIONS.md**: Verificar convenciones de nomenclatura aplicables
+- [ ] **USER_STORIES_GAP_ANALYSIS.md**: Confirmar funcionalidades requeridas
+- [ ] **RF_RNF_VALIDATION.md**: Validar requerimientos funcionales y no funcionales
+- [ ] **FASE_*.md**: Revisar plan específico del bloque a implementar
+- [ ] **MASTER_PLAN**: Si existe, revisar documentación del plan maestro
+
+#### **VALIDACIÓN DE CONSISTENCIA**:
+- [ ] **Campos de BD**: ¿Existen todos los campos necesarios en el esquema?
+- [ ] **Nomenclatura**: ¿Sigo las convenciones establecidas?
+- [ ] **Arquitectura**: ¿Mantengo clean architecture y principios SOLID?
+- [ ] **Dependencias**: ¿Identifico todas las dependencias del módulo?
+- [ ] **Impacto**: ¿Entiendo el impacto en otros módulos?
+
+#### **DOCUMENTACIÓN COMO FUENTE DE VERDAD**:
 - **CONSULTAR SIEMPRE**: `/docs` antes de implementar cualquier funcionalidad
 - **DICCIONARIO DE DATOS**: `/docs/DATA_DICTIONARY.md` - **CONSULTA OBLIGATORIA** antes de queries Prisma
 - **CONVENCIONES DE NOMENCLATURA**: `/docs/NAMING_CONVENTIONS.md` - Guía detallada
@@ -35,7 +54,9 @@ Implementar un sistema SGMM funcional, escalable y mantenible siguiendo arquitec
 - **NO INVENTAR**: Usar la documentación existente como base
 - **VALIDAR CONSISTENCIA**: Asegurar que documentación y código estén alineados
 
-### 4. ARQUITECTURA Y PRINCIPIOS
+### 4. VALIDACIÓN DE CALIDAD ARQUITECTURAL (OBLIGATORIA)
+
+#### **PRINCIPIOS ARQUITECTURALES OBLIGATORIOS**:
 - **CLEAN ARCHITECTURE**: Seguir capas bien definidas (Domain, Application, Infrastructure)
 - **SOLID PRINCIPLES**: Aplicar los 5 principios en todo el código
 - **HEXAGONAL DESIGN**: Desacoplar la lógica de negocio de la infraestructura
@@ -43,6 +64,29 @@ Implementar un sistema SGMM funcional, escalable y mantenible siguiendo arquitec
 - **INTERFACE SEGREGATION**: Crear interfaces específicas y cohesivas
 - **SINGLE RESPONSIBILITY**: Una clase = una responsabilidad
 - **NO GOD CLASSES**: Evitar clases que hagan demasiado
+
+#### **VALIDACIÓN DE PATRONES DE DISEÑO**:
+- [ ] **Repository Pattern**: ¿Uso repositorios para acceso a datos?
+- [ ] **Service Layer**: ¿Separo lógica de negocio en servicios?
+- [ ] **DTO Pattern**: ¿Uso DTOs para transferencia de datos?
+- [ ] **Factory Pattern**: ¿Uso factories para creación de objetos complejos?
+- [ ] **Observer Pattern**: ¿Implemento notificaciones correctamente?
+- [ ] **Strategy Pattern**: ¿Uso estrategias para algoritmos variables?
+
+#### **VALIDACIÓN DE NAMING CONVENTIONS**:
+- [ ] **Backend**: ¿Sigo kebab-case para archivos, PascalCase para clases?
+- [ ] **Frontend**: ¿Sigo PascalCase para componentes, camelCase para funciones?
+- [ ] **Base de Datos**: ¿Uso snake_case para tablas y campos?
+- [ ] **Interfaces**: ¿Uso prefijo 'I' para interfaces?
+- [ ] **Constantes**: ¿Uso UPPER_SNAKE_CASE para constantes?
+- [ ] **Enums**: ¿Uso PascalCase para enums?
+
+#### **VALIDACIÓN DE ESTRUCTURA DE PROYECTO**:
+- [ ] **Separación de Capas**: ¿Mantengo Domain, Application, Infrastructure separados?
+- [ ] **Módulos**: ¿Organizo por módulos de negocio?
+- [ ] **Dependencias**: ¿Las dependencias apuntan hacia adentro (hacia Domain)?
+- [ ] **Interfaces**: ¿Defino interfaces en la capa de dominio?
+- [ ] **Implementaciones**: ¿Implemento en la capa de infraestructura?
 
 ### 2. DOCUMENTACIÓN COMO FUENTE DE VERDAD
 - **CONSULTAR SIEMPRE**: `/docs` antes de implementar cualquier funcionalidad
@@ -307,6 +351,45 @@ frontend/
 
 ---
 
+## 📋 PROCESO DE VALIDACIÓN POR BLOQUE (OBLIGATORIO)
+
+### **FASE 1: REVISIÓN DE FUENTES DE VERDAD (ANTES DE INICIAR)**
+- [ ] **DATA_DICTIONARY.md**: Campos, tipos, restricciones, reglas de negocio
+- [ ] **DATABASE_SCHEMA_COMPLETE.md**: Estructura de tablas y relaciones
+- [ ] **NAMING_CONVENTIONS.md**: Convenciones aplicables al bloque
+- [ ] **USER_STORIES_GAP_ANALYSIS.md**: Funcionalidades requeridas
+- [ ] **RF_RNF_VALIDATION.md**: Requerimientos funcionales y no funcionales
+- [ ] **FASE_*.md**: Plan específico del bloque
+- [ ] **MASTER_PLAN**: Documentación del plan maestro (si aplica)
+
+### **FASE 2: ANÁLISIS DE IMPACTO (DURANTE EL BLOQUE)**
+- [ ] **Módulos afectados**: ¿Qué módulos se ven afectados?
+- [ ] **Dependencias**: ¿Qué depende de esto y de qué depende esto?
+- [ ] **APIs**: ¿Qué endpoints cambian?
+- [ ] **Base de datos**: ¿Qué tablas/campos se modifican?
+- [ ] **Frontend**: ¿Qué componentes se ven afectados?
+
+### **FASE 3: VALIDACIÓN ARQUITECTURAL (DURANTE EL BLOQUE)**
+- [ ] **Principios SOLID**: ¿Aplico los 5 principios?
+- [ ] **Clean Architecture**: ¿Mantengo separación de capas?
+- [ ] **Patrones de diseño**: ¿Uso patrones apropiados?
+- [ ] **Naming conventions**: ¿Sigo convenciones establecidas?
+- [ ] **Estructura de proyecto**: ¿Mantengo organización por módulos?
+
+### **FASE 4: VALIDACIÓN DE CALIDAD (AL FINALIZAR)**
+- [ ] **Funcionalidad**: ¿El bloque cumple su objetivo?
+- [ ] **Tests**: ¿Tests unitarios e integración pasan?
+- [ ] **Performance**: ¿Rendimiento aceptable?
+- [ ] **Seguridad**: ¿Validaciones y permisos correctos?
+- [ ] **Documentación**: ¿Documentación actualizada?
+
+### **FASE 5: CHECKPOINT (ANTES DE CONTINUAR)**
+- [ ] **Funcionalidad probada**: ¿Probé manualmente?
+- [ ] **Sin errores**: ¿No hay errores de compilación?
+- [ ] **Tests pasando**: ¿Todos los tests pasan?
+- [ ] **Commit realizado**: ¿Commit atómico y descriptivo?
+- [ ] **Documentación actualizada**: ¿README y docs actualizados?
+
 ## 📋 CHECKLIST DE ANÁLISIS ANTES DE CAMBIOS
 
 ### **Impacto**
@@ -335,6 +418,79 @@ frontend/
 
 ---
 
+## 🔧 COMANDOS DE VALIDACIÓN OBLIGATORIOS
+
+### **Validación de Fuentes de Verdad**
+```bash
+# Verificar que documentación existe y está actualizada
+ls -la docs/DATA_DICTIONARY.md
+ls -la docs/DATABASE_SCHEMA_COMPLETE.md
+ls -la docs/NAMING_CONVENTIONS.md
+ls -la docs/USER_STORIES_GAP_ANALYSIS.md
+ls -la docs/RF_RNF_VALIDATION.md
+
+# Verificar plan de fase específico
+ls -la docs/FASE_*.md
+ls -la docs/masterPlan/
+```
+
+### **Validación de Código Backend**
+```bash
+# Compilar TypeScript
+cd backend && npx tsc --noEmit
+
+# Ejecutar tests
+npm test
+
+# Linting
+npm run lint
+
+# Verificar Prisma
+npx prisma generate
+npx prisma validate
+```
+
+### **Validación de Código Frontend**
+```bash
+# Compilar TypeScript
+cd frontend && npx tsc --noEmit
+
+# Ejecutar tests
+npm test
+
+# Linting
+npm run lint
+
+# Build de producción
+npm run build
+```
+
+### **Validación de Base de Datos**
+```bash
+# Verificar migraciones
+npx prisma migrate status
+
+# Validar esquema
+npx prisma validate
+
+# Generar cliente
+npx prisma generate
+```
+
+### **Validación de Arquitectura**
+```bash
+# Verificar estructura de carpetas
+find src -type d -name "domain" -o -name "application" -o -name "infrastructure"
+
+# Verificar imports (dependencias hacia adentro)
+grep -r "import.*domain" src/infrastructure/
+grep -r "import.*infrastructure" src/domain/
+
+# Verificar convenciones de nomenclatura
+find src -name "*.ts" | xargs grep -l "class.*[A-Z]"
+find src -name "*.ts" | xargs grep -l "interface.*[A-Z]"
+```
+
 ## 🎯 OBJETIVOS DE CALIDAD
 
 - **Cobertura de tests**: > 80%
@@ -347,5 +503,27 @@ frontend/
 ---
 
 *Última actualización: 2025-01-15*
-*Versión: 1.0*
+*Versión: 2.0*
 *Responsable: Equipo de Desarrollo SGMM*
+
+## 📋 CAMBIOS EN VERSIÓN 2.0
+
+### **Nuevas Funcionalidades**:
+- ✅ **Revisión obligatoria de fuentes de verdad** antes de cada bloque
+- ✅ **Proceso de validación por bloque** en 5 fases
+- ✅ **Validación de calidad arquitectural** obligatoria
+- ✅ **Comandos de validación** específicos
+- ✅ **Checklist detallado** para cada fase del proceso
+
+### **Mejoras en Metodología**:
+- ✅ **Integración con Master Plan** para proyectos complejos
+- ✅ **Validación de patrones de diseño** específicos
+- ✅ **Validación de naming conventions** detallada
+- ✅ **Validación de estructura de proyecto** arquitectural
+- ✅ **Comandos automatizados** para validaciones
+
+### **Alineación con Proyecto SGMM**:
+- ✅ **Fuentes de verdad específicas** del proyecto
+- ✅ **Validaciones arquitecturales** para Clean Architecture
+- ✅ **Comandos específicos** para stack tecnológico
+- ✅ **Integración con documentación** existente
