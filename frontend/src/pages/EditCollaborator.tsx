@@ -67,8 +67,8 @@ export default function EditCollaborator() {
   const valid = useMemo(() => !!form.first_name && !!form.paternal_last_name, [form])
   const save = useMutation({
     mutationFn: async () => {
-      console.log('🔍 [DEBUG] Saving employee with form.id:', form.id, 'and id from URL:', id);
-      // Usar el employee_number (id de la URL) para el PUT request
+      console.log('🔍 [DEBUG] Saving employee with id:', id);
+      // Ahora el ID es el mismo en todos lados (3619)
       return apiPut(`/api/employees/${id}`, form);
     },
     onSuccess: () => { 

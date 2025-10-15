@@ -8,11 +8,8 @@ export class CollaboratorSummaryService {
   ) {}
 
   async getSummary(employeeIdOrNumber: string) {
-    // Intentar buscar primero por employee_number, luego por ID
-    let employee = await this.employees.findByEmployeeNumber(employeeIdOrNumber);
-    if (!employee) {
-      employee = await this.employees.findById(employeeIdOrNumber);
-    }
+    // Ahora el ID es el mismo que employee_number, buscar directamente por ID
+    const employee = await this.employees.findById(employeeIdOrNumber);
     if (!employee) throw new Error('Employee not found');
     
     const active = await this.dependents.listActiveByEmployee(employee.id);

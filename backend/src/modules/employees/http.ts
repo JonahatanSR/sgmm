@@ -23,12 +23,8 @@ export async function employeeRoutes(app: FastifyInstance) {
     
     console.log('🔍 [DEBUG] PUT /api/employees/:id - Received id:', id, 'body:', body);
     
-    // Primero intentar encontrar el empleado por employee_number o por id interno
-    let employee = await repo.findByEmployeeNumber(id);
-    if (!employee) {
-      employee = await repo.findById(id);
-    }
-    
+    // Verificar que el empleado existe
+    const employee = await repo.findById(id);
     if (!employee) {
       console.log('❌ [DEBUG] Employee not found for id:', id);
       return reply.code(404).send({ message: 'Employee not found' });
@@ -36,8 +32,8 @@ export async function employeeRoutes(app: FastifyInstance) {
     
     console.log('✅ [DEBUG] Found employee:', employee.id, 'employee_number:', employee.employee_number);
     
-    // Usar el ID interno para el UPDATE
-    const updated = await service.update(employee.id, body, employee.id);
+    // Usar el ID directamente para el UPDATE (ahora es el mismo que employee_number)
+    const updated = await service.update(id, body, id);
     return updated;
   };
 
