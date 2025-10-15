@@ -31,9 +31,11 @@ export class DependentsService {
 
     const maxSeq = await this.repo.getMaxSeq(input.employee_id);
     const nextSeq = maxSeq + 1;
+    console.log('🔍 [DEBUG] DependentsService.create - userId:', userId, 'employee_id:', input.employee_id);
+    
     // Build dependent_id: employee_number-aNN; we need employee_number → fetch via relation is heavier; build lazily at repo level or pass as param
     // Here we require employee_number in input for correctness or fetch it via repo; keep simple: repo will construct using join
-    const created = await this.repo.create({ ...input, dependent_seq: nextSeq } as any);
+    const created = await this.repo.create({ ...input, dependent_seq: nextSeq, created_by: userId } as any);
     await this.audit.log({ userId, action: 'CREATE_DEPENDENT', entity: 'dependent', entityId: created.id, oldValues: null, newValues: created });
     return created;
   }

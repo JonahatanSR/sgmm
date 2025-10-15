@@ -20,14 +20,28 @@ export class PrismaDependentRepository implements DependentRepository {
 
   async create(data: any): Promise<Dependent> {
     // Ensure dependent_id is generated from employee_number + aNN
-    const { employee_id, dependent_seq } = data;
+    const { employee_id, dependent_seq, created_by } = data;
+    console.log('🔍 [DEBUG] PrismaDependentRepository.create - Input data:', { employee_id, dependent_seq, created_by });
+    
     if (!employee_id || !dependent_seq) {
       throw new Error('employee_id and dependent_seq are required to create dependent');
     }
     const employee = await this.prisma.employee.findUnique({ where: { id: employee_id }, select: { employee_number: true } });
     if (!employee) throw new Error('Employee not found for dependent');
     const depId = `${employee.employee_number}-a${String(dependent_seq).padStart(2, '0')}`;
-    const row = await this.prisma.dependent.create({ data: { ...data, dependent_id: depId } });
+    
+    const finalCreatedBy = created_by || employee_id;
+    console.log('🔍 [DEBUG] Final created_by value:', finalCreatedBy);
+    
+    const row = await this.prisma.dependent.create({ 
+      data: { 
+        ...data, 
+        dependent_id: depId,
+        created_by: finalCreatedBy
+      } 
+    });
+    
+    console.log('✅ [DEBUG] Created dependent with created_by:', row.created_by);
     return row as unknown as Dependent;
   }
 

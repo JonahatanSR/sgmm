@@ -38,13 +38,15 @@ export default function PanelRH() {
   const { data: companies, isLoading: loadingCompanies } = useQuery<Array<{ id: string; name: string; code: string }>>({
     queryKey: ['companies'],
     queryFn: () => apiGet('/api/companies'),
-    staleTime: 60_000,
+    staleTime: 0,
+    gcTime: 0,
   })
 
   const { data: relTypes } = useQuery<{ id: number; name: string }[]>({
     queryKey: ['relationship-types'],
     queryFn: () => apiGet('/api/relationship-types'),
-    staleTime: 60_000,
+    staleTime: 0,
+    gcTime: 0,
   })
 
   const relMap = new Map<number, string>((relTypes || []).map(r => [r.id, r.name]))

@@ -16,7 +16,8 @@ export default function AdminAudit() {
   const { data, isLoading, error, refetch } = useQuery<AuditRow[]>({
     queryKey: ['admin-audit'],
     queryFn: () => apiGet('/api/admin/audit'),
-    staleTime: 10_000,
+    staleTime: 0,
+    gcTime: 0,
   })
 
   return (

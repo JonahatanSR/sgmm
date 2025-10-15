@@ -36,7 +36,9 @@ export default function EditCollaborator() {
       return apiGet<SummaryData>(`/api/collaborator/${id}/summary`);
     },
     enabled: !!id, // Solo ejecutar si hay un ID
-    retry: 1
+    retry: false,
+    staleTime: 0,
+    gcTime: 0,
   })
   
   console.log('🔍 [DEBUG] Summary data:', summaryData);

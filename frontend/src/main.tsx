@@ -15,7 +15,7 @@ import DependentForm from './pages/DependentForm'
 import EditCollaborator from './pages/EditCollaborator'
 import AdminAudit from './pages/AdminAudit'
 import PanelRH from './pages/PanelRH'
-import PrivacyPolicy from './pages/PrivacyPolicy'
+// import PrivacyPolicy from './pages/PrivacyPolicy' // DESHABILITADO - usar modal
 
 const withLayout = (el: React.ReactNode) => <Layout>{el}</Layout>
 
@@ -38,11 +38,11 @@ const router = createBrowserRouter([
     element: withLayout(<App />)
   },
   
-  // Ruta pública: Aviso de privacidad
-  {
-    path: '/privacy-policy',
-    element: <PrivacyPolicy />
-  },
+  // Ruta pública: Aviso de privacidad - DESHABILITADA (usar modal)
+  // {
+  //   path: '/privacy-policy',
+  //   element: <PrivacyPolicy />
+  // },
   
   // Rutas de desarrollo: Sin autenticación
   {
@@ -89,8 +89,10 @@ const router = createBrowserRouter([
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1,
+      retry: false,
       refetchOnWindowFocus: false,
+      staleTime: 0,
+      gcTime: 0,
     },
   },
 })

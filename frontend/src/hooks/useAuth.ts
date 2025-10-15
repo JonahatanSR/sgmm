@@ -31,7 +31,8 @@ export const useAuth = () => {
     queryFn: fetchCurrentUser,
     retry: false,  // No reintentar si falla (probablemente sin sesión)
     refetchOnWindowFocus: false,  // No refetch automático al enfocar ventana
-    staleTime: 5 * 60 * 1000,  // Considerar datos válidos por 5 minutos
+    staleTime: 0,
+    gcTime: 0,
   });
 
   return {

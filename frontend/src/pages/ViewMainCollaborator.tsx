@@ -42,7 +42,8 @@ export default function ViewMainCollaborator() {
   const { data: relTypes } = useQuery<{ id: number; name: string }[]>({
     queryKey: ['relationship-types'],
     queryFn: () => apiGet('/api/relationship-types'),
-    staleTime: 60_000,
+    staleTime: 0,
+    gcTime: 0,
   });
 
   const relMap = new Map<number, string>((relTypes || []).map(r => [r.id, r.name]));

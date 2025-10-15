@@ -33,8 +33,14 @@ export async function dependentRoutes(app: FastifyInstance) {
   const createHandler = async (req: any) => {
     const { employeeId } = req.params as any;
     const body = req.body as any;
-    // usar employeeId como actor provisional para auditoría
-    return service.create({ ...body, employee_id: employeeId }, employeeId);
+    // Buscar el ID real del empleado en la base de datos
+    const employee = await prisma.employee.findUnique({ 
+      where: { employee_number: employeeId }, 
+      select: { id: true, employee_number: true } 
+    });
+    if (!employee) throw new Error('Employee not found');
+    console.log('🔍 [DEBUG] HTTP createHandler - employeeId:', employeeId, 'employee.id:', employee.id, 'employee.employee_number:', employee.employee_number);
+    return service.create({ ...body, employee_id: employee.id }, employee.employee_number);
   };
 
   const updateHandler = async (req: any) => {

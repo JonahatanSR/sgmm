@@ -208,9 +208,16 @@ export class SamlAuthService {
    * Obtiene o crea una empresa basada en el dominio
    */
   private async getOrCreateCompany(domain: string): Promise<string> {
-    // Por ahora, retornar un ID de empresa por defecto
-    // En el futuro, se puede implementar lógica para crear empresas automáticamente
-    return 'company-default-001';
+    // Mapear dominios a companies existentes
+    if (domain === 'siegfried.com.mx') {
+      return 'company-sr-001';
+    }
+    if (domain === 'weserpharma.com.mx') {
+      return 'company-wp-001';
+    }
+    
+    // Por defecto, usar Siegfried Rhein
+    return 'company-sr-001';
   }
 
   /**

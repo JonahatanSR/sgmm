@@ -23,11 +23,13 @@ export default function DependentForm() {
   const isEdit = Boolean(id)
   
   const [privacyAccepted, setPrivacyAccepted] = useState(false)
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false)
 
   const { data: relTypes } = useQuery<{ id: number; name: string }[]>({
     queryKey: ['relationship-types'],
     queryFn: () => apiGet('/api/relationship-types'),
-    staleTime: 60_000,
+    staleTime: 0,
+    gcTime: 0,
   })
 
   const { data: existing, isFetching } = useQuery<Dependent>({
@@ -101,7 +103,29 @@ export default function DependentForm() {
         body: JSON.stringify(payload),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      return res.json()
+      const dependentData = await res.json()
+      
+      // Registrar la aceptación de privacidad DESPUÉS de crear el dependiente
+      if (privacyAccepted && dependentData.id) {
+        try {
+          await fetch('/api/privacy/accept', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              employee_id: employeeId,
+              dependent_id: dependentData.id,
+              acceptance_type: 'DEPENDENT',
+              privacy_version: 'v1.0'
+            })
+          })
+          console.log('✅ Aceptación de privacidad registrada para dependiente:', dependentData.id)
+        } catch (error) {
+          console.warn('No se pudo registrar la aceptación de privacidad:', error)
+          // No fallar por esto, solo registrar en consola
+        }
+      }
+      
+      return dependentData
     },
     onSuccess: () => {
       pushToast('Datos guardados correctamente')
@@ -189,15 +213,16 @@ export default function DependentForm() {
               <div className="flex-1">
                 <label htmlFor="privacy-acceptance" className="text-sm text-gray-700 cursor-pointer">
                   He leído y acepto el{' '}
-                  <a 
-                    href="/privacy-policy" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 underline font-medium"
-                    onClick={(e) => e.stopPropagation()}
+                  <button 
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setShowPrivacyModal(true);
+                    }}
+                    className="text-blue-600 hover:text-blue-800 underline font-medium cursor-pointer"
                   >
                     Aviso de Privacidad
-                  </a>{' '}
+                  </button>{' '}
                   de Siegfried Rhein, S.A. de C.V. para el tratamiento de los datos personales 
                   del dependiente con la finalidad de gestionar la inscripción, actualización, 
                   altas y bajas en el seguro de gastos médicos mayores.
@@ -223,6 +248,98 @@ export default function DependentForm() {
       {toasts.map(t => (
         <div key={t.id} className="toast">{t.message}</div>
       ))}
+
+        {/* Modal de Aviso de Privacidad - Solo informativo */}
+        {showPrivacyModal && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 p-4 modal-overlay">
+            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Aviso de Privacidad - Siegfried Rhein
+                  </h2>
+                  <button
+                    onClick={() => setShowPrivacyModal(false)}
+                    className="text-gray-400 hover:text-gray-600 text-2xl font-bold"
+                  >
+                    ×
+                  </button>
+                </div>
+                
+                <div className="space-y-4 text-gray-700">
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                      AVISO DE PRIVACIDAD CORTO
+                    </h3>
+                    
+                    <div className="text-sm leading-relaxed space-y-3">
+                      <p>
+                        <strong>Siegfried Rhein, S.A. de C.V.</strong>, conocido comercialmente como 
+                        Siegfried Rhein, con domicilio en calle Antonio Dovalí Jaime 70, Torre D, 
+                        Piso 12, Colonia Santa Fe, Alcaldía Álvaro Obregón, C.P. 01210, Ciudad de 
+                        México, México, y con portal de Internet{' '}
+                        <a 
+                          href="http://www.siegfried.com.mx" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 underline"
+                        >
+                          http://www.siegfried.com.mx
+                        </a>, utilizará sus datos personales aquí recabados únicamente con la 
+                        finalidad de gestionar la inscripción, actualización, altas y bajas en el 
+                        seguro de gastos médicos mayores contratado por Siegfried Rhein, S.A. de C.V., 
+                        así como para dar seguimiento a trámites administrativos relacionados.
+                      </p>
+                      
+                      <p>
+                        Sus datos serán tratados de forma confidencial y únicamente serán compartidos 
+                        con la aseguradora y terceros estrictamente necesarios para cumplir con los 
+                        fines señalados.
+                      </p>
+                      
+                      <p>
+                        Usted podrá manifestar su negativa para el tratamiento de datos personales y 
+                        podrá ejercer en cualquier momento sus derechos ARCO (acceso, rectificación, 
+                        cancelación y oposición), contactando al Departamento de Datos Personales a 
+                        través del correo electrónico{' '}
+                        <a 
+                          href="mailto:privacidad@siegfried.com.mx"
+                          className="text-blue-600 hover:text-blue-800 underline"
+                        >
+                          privacidad@siegfried.com.mx
+                        </a>.
+                      </p>
+                      
+                      <p>
+                        Para mayor información acerca del tratamiento de sus datos personales, de los 
+                        derechos que puede hacer valer y/o las modificaciones o actualizaciones que 
+                        pueda sufrir el presente aviso de privacidad, usted puede consultar el aviso 
+                        de privacidad integral, puesto a su disposición en la página de internet{' '}
+                        <a 
+                          href="http://www.siegfried.com.mx" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 underline"
+                        >
+                          http://www.siegfried.com.mx
+                        </a>.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-6 pt-4 border-t border-gray-200 flex justify-end">
+                  <button
+                    onClick={() => setShowPrivacyModal(false)}
+                    className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
     </div>
   )
 }

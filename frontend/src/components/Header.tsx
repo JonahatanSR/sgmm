@@ -11,7 +11,8 @@ export default function Header() {
     queryKey: ['collaborator', collabId],
     queryFn: () => apiGet(`/api/collaborator/${collabId}/summary`),
     enabled: Boolean(collabId),
-    staleTime: 60_000,
+    staleTime: 0,
+    gcTime: 0,
   })
 
 

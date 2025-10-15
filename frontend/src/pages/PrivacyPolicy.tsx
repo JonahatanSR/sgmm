@@ -1,7 +1,66 @@
 import { useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const PrivacyPolicy = () => {
   const [isAccepted, setIsAccepted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  
+  // Obtener employeeId de los parámetros de URL
+  const employeeId = searchParams.get('employeeId');
+  
+  if (!employeeId) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Error</h1>
+          <p className="text-gray-600 mb-4">No se encontró el ID del empleado en la URL.</p>
+          <button 
+            onClick={() => window.history.back()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Regresar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const handleContinueToForm = async () => {
+    if (!isAccepted) return;
+    
+    setIsLoading(true);
+    
+    try {
+      // Registrar la aceptación de privacidad
+      const response = await fetch('/api/privacy/accept', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          employee_id: employeeId,
+          acceptance_type: 'EMPLOYEE',
+          privacy_version: 'v1.0'
+        })
+      });
+
+      if (response.ok) {
+        console.log('✅ Aceptación de privacidad registrada');
+        // Redirigir al formulario de dependientes con parámetro de privacidad aceptada
+        navigate(`/dependents/new/${employeeId}?privacyAccepted=true`);
+      } else {
+        console.error('Error registrando aceptación de privacidad');
+        // Continuar de todas formas para no bloquear al usuario
+        navigate(`/dependents/new/${employeeId}?privacyAccepted=true`);
+      }
+    } catch (error) {
+      console.error('Error en aceptación de privacidad:', error);
+      // Continuar de todas formas para no bloquear al usuario
+      navigate(`/dependents/new/${employeeId}?privacyAccepted=true`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
@@ -106,21 +165,15 @@ const PrivacyPolicy = () => {
         </button>
         
         <button
-          disabled={!isAccepted}
-          onClick={() => {
-            if (isAccepted) {
-              // Aquí se integraría con el formulario de dependientes
-              alert('Aviso aceptado. Redirigiendo al formulario...');
-              // window.location.href = '/dependents/new/...';
-            }
-          }}
+          disabled={!isAccepted || isLoading}
+          onClick={handleContinueToForm}
           className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-            isAccepted
+            isAccepted && !isLoading
               ? 'bg-blue-600 text-white hover:bg-blue-700'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
         >
-          Continuar al Formulario
+          {isLoading ? 'Procesando...' : 'Continuar al Formulario'}
         </button>
       </div>
     </div>
