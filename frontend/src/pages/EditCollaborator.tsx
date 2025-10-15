@@ -15,24 +15,40 @@ type Employee = {
 export default function EditCollaborator() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
-  const { data, isLoading } = useQuery<Employee>({
-    queryKey: ['employee', id],
-    queryFn: () => apiGet(`/api/employees/${id}`),
+  
+  // Obtener datos del colaborador usando el endpoint de summary
+  const { data: summaryData, isLoading: summaryLoading } = useQuery({
+    queryKey: ['collaborator', id],
+    queryFn: () => apiGet(`/api/collaborator/${id}/summary`),
   })
 
   const [form, setForm] = useState<Employee>({ id })
+  
   useEffect(() => {
-    if (data) setForm(data)
-  }, [data])
+    if (summaryData?.employee) {
+      const emp = summaryData.employee;
+      setForm({
+        id: emp.id,
+        first_name: emp.first_name,
+        paternal_last_name: emp.paternal_last_name,
+        maternal_last_name: emp.maternal_last_name,
+        gender: emp.gender,
+        birth_date: emp.birth_date,
+      })
+    }
+  }, [summaryData])
 
-  const valid = useMemo(() => !!form, [form])
+  const valid = useMemo(() => !!form.first_name && !!form.paternal_last_name, [form])
   const save = useMutation({
-    mutationFn: async () => apiPut(`/api/employees/${id}`, form),
-    onSuccess: () => { alert('Datos actualizados correctamente'); navigate(`/collaborator/${id}`) },
+    mutationFn: async () => apiPut(`/api/employees/${form.id}`, form),
+    onSuccess: () => { 
+      alert('Datos actualizados correctamente'); 
+      navigate(`/collaborator/${id}`) 
+    },
     onError: () => alert('Error al actualizar. Revisa los datos.'),
   })
 
-  if (isLoading) return <div className="p-6">Cargando…</div>
+  if (summaryLoading) return <div className="p-6">Cargando datos del colaborador…</div>
 
   const inputCls = 'w-full rounded-md border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]'
   const labelCls = 'text-xs font-medium text-gray-600 mb-1 block'
