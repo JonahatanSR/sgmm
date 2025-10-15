@@ -12,6 +12,10 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
     return (await this.prisma.employee.findUnique({ where: { email } })) as unknown as Employee | null;
   }
 
+  async findByEmployeeNumber(employeeNumber: string): Promise<Employee | null> {
+    return (await this.prisma.employee.findUnique({ where: { employee_number: employeeNumber } })) as unknown as Employee | null;
+  }
+
   async update(id: string, data: Partial<Employee>): Promise<Employee> {
     const allowed: Partial<Employee> = {};
     const fields: (keyof Employee)[] = [
@@ -49,6 +53,20 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
     }
     const rows = await this.prisma.employee.findMany({ where, take: 10, orderBy: { full_name: 'asc' } });
     return rows as unknown as Employee[];
+  }
+
+  async create(data: Partial<Employee>): Promise<Employee> {
+    const created = await this.prisma.employee.create({
+      data: {
+        email: data.email || '',
+        full_name: data.full_name || '',
+        employee_number: data.employee_number || '',
+        company_id: data.company_id || '',
+        hire_date: new Date(),
+        status: 'ACTIVE'
+      }
+    });
+    return created as unknown as Employee;
   }
 }
 

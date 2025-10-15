@@ -1,6 +1,7 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import formbody from '@fastify/formbody';
+import cookie from '@fastify/cookie';
 import { env } from './config/environment';
 import { getPrismaClient } from './config/database';
 import { registerSession } from './middleware/session';
@@ -12,6 +13,7 @@ import { pdfRoutes } from './modules/pdf/http';
 import { adminAuditRoutes } from './modules/admin/audit';
 import { adminCompanyRoutes } from './modules/admin/companies';
 import { authRoutes } from './modules/auth/http';
+import { privacyRoutes } from './modules/privacy/privacyHttp';
 
 // Create Fastify instance
 const fastify = Fastify({
@@ -40,6 +42,9 @@ fastify.register(cors, {
 
 // Register form body parser (required for SAML callback)
 fastify.register(formbody);
+
+// Register cookie support
+fastify.register(cookie);
 
 // Health check route
 fastify.get('/health', async (request, reply) => {
@@ -92,6 +97,7 @@ fastify.register(relationshipTypeRoutes);
 fastify.register(pdfRoutes);
 fastify.register(adminAuditRoutes);
 fastify.register(adminCompanyRoutes);
+fastify.register(privacyRoutes);
 
 // Global error handler
 fastify.setErrorHandler((error, request, reply) => {
@@ -128,8 +134,8 @@ process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 // Start server
 const start = async () => {
   try {
-    // Register Session middleware
-    await registerSession(fastify);
+// Register Session middleware - TEMPORALMENTE DESHABILITADO PARA DEBUGGING
+// await registerSession(fastify);
     
     // Test database connection
     const prisma = getPrismaClient();
@@ -148,6 +154,7 @@ const start = async () => {
     
   } catch (error: any) {
     fastify.log.error('Error starting server:', error);
+    console.error('DETAILED ERROR:', error);
     process.exit(1);
   }
 };

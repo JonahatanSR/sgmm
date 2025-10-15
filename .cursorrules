@@ -1,436 +1,351 @@
-# SGMM (Sistema de Gestión de Gastos Médicos Mayores) - Cursor Rules
+# SISTEMA SGMM - REGLAS DE DESARROLLO
+# Sistema de Gestión de Gastos Médicos Mayores
+# Arquitectura: Clean Architecture con Hexagonal Design
 
-## Project Overview
-Sistema de recolección y actualización de datos para renovación anual de seguros médicos. Multi-company con branding personalizable, templates PDF customizables por RH, y sistema de comunicaciones.
+## 🎯 OBJETIVO PRINCIPAL
+Implementar un sistema SGMM funcional, escalable y mantenible siguiendo arquitectura limpia y principios SOLID.
 
-## Technology Stack
-- **Backend**: Node.js + TypeScript + Fastify + Prisma ORM
-- **Frontend**: React + Vite + TailwindCSS v4 (import único) + React Query
-- **Database**: PostgreSQL + Redis (cache/sessions)
-- **PDF**: @react-pdf/renderer con template builder visual
-- **Auth**: Passport.js (Google OAuth + OTP local)
-- **File Processing**: Multer + Sharp
-- **Email**: Nodemailer + templates
-- **Deployment**: Docker + Docker Compose + Nginx
-- **Persistence**: Named volumes para datos críticos
+## 📋 REGLAS DE DESARROLLO OBLIGATORIAS
 
-## Architecture Principles
+### 1. METODOLOGÍA DE BLOQUES DE TRABAJO
+- **BLOQUES ATÓMICOS**: Unidades de trabajo completas de 30-90 minutos
+- **VALIDACIÓN POR BLOQUE**: Validación rápida al finalizar cada bloque (5-10 min)
+- **CERO DEUDA TÉCNICA**: Resolver problemas críticos inmediatamente
+- **DOCUMENTACIÓN INLINE**: Comentarios en código + actualización de README
+- **COMMITS SIGNIFICATIVOS**: Un commit por bloque con mensaje descriptivo
+- **CHECKPOINT**: Verificar que funciona antes de continuar al siguiente bloque
 
-### Core Patterns
-- Repository Pattern para data access
-- Service Layer para business logic
-- Strategy Pattern para authentication (Google OAuth vs OTP)
-- Template Method Pattern para PDF generation
-- Observer Pattern para audit logging
+**Referencia**: Ver documentación de fases en `/docs/FASE_*.md` para detalles completos
 
-### Code Organization
+### 2. CRITERIOS DE VALIDACIÓN POR TAREA OBLIGATORIOS
+- **ANALIZAR IMPACTO COMPLETO**: ¿Qué se ve afectado por este cambio?
+- **MAPEAR DEPENDENCIAS**: ¿Qué depende de esto y de qué depende esto?
+- **VERIFICAR IMPORTS**: ¿Están correctos todos los imports necesarios?
+- **COMPRENDER ECOSISTEMA**: ¿Cómo se integra esto con el resto del sistema?
+- **VALIDAR CON GATES**: Ejecutar validaciones antes de aceptar cambios
+- **ANÁLISIS FORENSE**: Investigar causa raíz antes de implementar soluciones
+
+### 3. DOCUMENTACIÓN COMO FUENTE DE VERDAD
+- **CONSULTAR SIEMPRE**: `/docs` antes de implementar cualquier funcionalidad
+- **DICCIONARIO DE DATOS**: `/docs/DATA_DICTIONARY.md` - **CONSULTA OBLIGATORIA** antes de queries Prisma
+- **CONVENCIONES DE NOMENCLATURA**: `/docs/NAMING_CONVENTIONS.md` - Guía detallada
+- **PLANES DE FASES**: `/docs/FASE_*.md` - **CONSULTA OBLIGATORIA** para implementación
+- **DICCIONARIO = LEY**: Si hay conflicto entre código y diccionario, el diccionario tiene razón
+- **ACTUALIZAR AL CERRAR**: Documentar cuando se completa un módulo/funcionalidad
+- **NO INVENTAR**: Usar la documentación existente como base
+- **VALIDAR CONSISTENCIA**: Asegurar que documentación y código estén alineados
+
+### 4. ARQUITECTURA Y PRINCIPIOS
+- **CLEAN ARCHITECTURE**: Seguir capas bien definidas (Domain, Application, Infrastructure)
+- **SOLID PRINCIPLES**: Aplicar los 5 principios en todo el código
+- **HEXAGONAL DESIGN**: Desacoplar la lógica de negocio de la infraestructura
+- **DEPENDENCY INJECTION**: Usar inyección de dependencias para desacoplamiento
+- **INTERFACE SEGREGATION**: Crear interfaces específicas y cohesivas
+- **SINGLE RESPONSIBILITY**: Una clase = una responsabilidad
+- **NO GOD CLASSES**: Evitar clases que hagan demasiado
+
+### 2. DOCUMENTACIÓN COMO FUENTE DE VERDAD
+- **CONSULTAR SIEMPRE**: `/docs` antes de implementar cualquier funcionalidad
+- **DICCIONARIO DE DATOS**: `/docs/DATA_DICTIONARY.md` - **CONSULTA OBLIGATORIA** antes de queries
+- **ESQUEMA DE BD**: `/docs/DATABASE_SCHEMA_COMPLETE.md` - **CONSULTA OBLIGATORIA** para estructura
+- **HISTORIAS DE USUARIO**: Validar funcionalidades contra requirements
+- **DICCIONARIO = LEY**: Si hay conflicto entre código y diccionario, el diccionario tiene razón
+- **ACTUALIZAR DOCUMENTACIÓN**: Mantener docs sincronizadas con código
+
+### 3. CONVENCIONES DE NOMENCLATURA
+
+#### **Backend (Node.js + TypeScript)**
+- **Archivos**: `kebab-case` (user-service.ts, employee-repository.ts)
+- **Clases**: `PascalCase` (UserService, EmployeeRepository)
+- **Interfaces**: `PascalCase` con prefijo `I` (IUserService, IEmployeeRepository)
+- **Funciones**: `camelCase` (getUserById, createEmployee)
+- **Constantes**: `UPPER_SNAKE_CASE` (MAX_FILE_SIZE, DEFAULT_TIMEOUT)
+- **Variables**: `camelCase` (userEmail, employeeData)
+- **Enums**: `PascalCase` (UserRole, EmployeeStatus)
+
+#### **Frontend (React + TypeScript)**
+- **Componentes**: `PascalCase` (UserProfile, EmployeeList)
+- **Hooks**: `camelCase` con prefijo `use` (useAuth, useEmployeeData)
+- **Archivos**: `kebab-case` (user-profile.tsx, employee-list.tsx)
+- **Props**: `camelCase` (userId, employeeData)
+- **Estados**: `camelCase` (isLoading, userData)
+
+#### **Base de Datos**
+- **Tablas**: `snake_case` en plural (employees, dependents)
+- **Campos**: `snake_case` (employee_id, created_at)
+- **Índices**: `idx_tabla_campo` (idx_employees_email)
+- **Foreign Keys**: `fk_tabla_campo` (fk_dependents_employee_id)
+
+### 4. ESTRUCTURA DE PROYECTO
+
+#### **Backend Structure**
 ```
-src/
-├── controllers/     # Route handlers por contexto (employee, hr, admin)
-├── services/       # Business logic layer
-├── repositories/   # Data access layer
-├── middleware/     # Auth, validation, logging
-├── models/         # Prisma models y tipos
-├── templates/      # Email y PDF templates
-├── utils/          # Helper functions
-└── config/         # Configuration management
-```
-
-### Naming Conventions
-
-#### Variables y Funciones
-- **camelCase**: `employeeData`, `generateReport()`
-- **Servicios**: `EmployeeService`, `BrandingService`
-- **Controllers**: `employeeController`, `hrController`
-- **Repositories**: `employeeRepository`, `documentRepository`
-
-#### Base de Datos
-- **Tablas**: `snake_case` (employees, company_settings)
-- **Columnas**: `snake_case` (first_name, company_id)
-- **IDs**: UUIDs, siempre `id` como primary key
-- **Foreign Keys**: `{tabla}_id` (company_id, employee_id)
-- **Timestamps**: `created_at`, `updated_at`, `deleted_at`
-
-#### Archivos
-- **Componentes React**: `PascalCase.tsx` (EmployeeCard.tsx)
-- **Services**: `camelCase.service.ts` (employee.service.ts)
-- **Utils**: `kebab-case.util.ts` (pdf-generator.util.ts)
-- **Types**: `PascalCase.types.ts` (Employee.types.ts)
-
-## Code Standards
-
-### TypeScript
-- Usar tipos explícitos, evitar `any`
-- Interfaces para objetos de datos
-- Types para unions y aliases
-- Utility types cuando sea apropiado
-
-```typescript
-// ✅ Correcto
-interface EmployeeData {
-  id: string;
-  fullName: string;
-  companyId: string;
-  status: EmployeeStatus;
-}
-
-// ❌ Incorrecto
-const employee: any = {...}
-```
-
-### Error Handling
-- Custom error classes por dominio
-- Middleware centralizado para error handling
-- Logging estructurado con contexto
-
-```typescript
-class BusinessError extends Error {
-  constructor(
-    message: string,
-    public code: string,
-    public statusCode: number = 400
-  ) {
-    super(message);
-  }
-}
-```
-
-### API Design
-- RESTful endpoints con contexto claro
-- Consistent response format
-- Proper HTTP status codes
-- Input validation con Joi/Zod
-
-```typescript
-// Estructura de respuesta consistente
-interface APIResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  meta?: {
-    pagination?: PaginationMeta;
-    filters?: FilterMeta;
-  };
-}
+backend/
+├── src/
+│   ├── config/           # Configuraciones
+│   ├── modules/          # Módulos de negocio
+│   │   ├── employees/
+│   │   │   ├── domain/   # Entidades, interfaces, tipos
+│   │   │   ├── application/ # Casos de uso, servicios
+│   │   │   └── infrastructure/ # Repositorios, adapters
+│   │   ├── dependents/
+│   │   ├── auth/
+│   │   └── reports/
+│   ├── shared/           # Utilidades compartidas
+│   └── server.ts         # Punto de entrada
+├── prisma/               # Esquema y migraciones
+└── docs/                 # Documentación técnica
 ```
 
-## Security Guidelines
-
-### Authentication
-- JWT tokens con refresh mechanism
-- OTP validation con time-based expiration
-- Rate limiting por endpoint
-- CORS configurado correctamente
-
-### Data Protection
-- Input sanitization obligatoria
-- SQL injection prevention (Prisma ORM)
-- File upload restrictions (.pdf, tamaño, tipo MIME)
-- Encryption para datos sensibles en BD
-
-### Audit Trail
-- Log todas las operaciones de HR_ADMIN y SUPER_ADMIN
-- Track cambios con old/new values
-- IP tracking para operaciones administrativas
-- Session management robusto
-
-## Multi-Company Architecture
-
-### Isolation
-- Company-scoped queries automáticas
-- Middleware para filtrado por compañía
-- Branding dinámico basado en usuario logueado
-- Templates separados por compañía
-
-### Configuration
-- Environment variables para feature flags
-- Company-specific settings en BD
-- Graceful degradation si fallan integraciones
-- Cache invalidation por compañía
-
-## PDF Template System
-
-### Template Structure
-- JSON config para campos activos/inactivos
-- CSS variables para branding dinámico
-- Component-based templates con React-PDF
-- Preview system para cambios de RH
-
-### Customization Rules
-- RH puede modificar solo campos habilitados
-- Validación de colores para accessibility
-- Font restrictions para consistency
-- Layout constraints para mantener profesionalismo
-
-## Communication System
-
-### Email Templates
-- Variables dinámicas con fallbacks
-- Company branding automático
-- Personalization por destinatario
-- Delivery tracking y retry logic
-
-### Automation Rules
-- Trigger conditions claramente definidas
-- Frequency limits para evitar spam
-- Manual override siempre disponible
-- Audit de todas las comunicaciones
-
-## Performance Guidelines
-
-### Database
-- Indexes en columnas de búsqueda frecuente
-- Connection pooling apropiado
-- Query optimization con EXPLAIN
-- Soft deletes para audit trail
-
-### Frontend
-- Code splitting por rutas
-- Lazy loading para componentes pesados
-- React Query para cache de API calls
-- Optimized images y assets
-
-### PDF Generation
-- Queue system para PDFs grandes
-- Worker threads para processing
-- Cleanup automático de archivos temporales
-- Stream processing para reportes masivos
-
-## Testing Strategy
-
-### Unit Tests
-- Services y utils con coverage > 80%
-- Mock external dependencies
-- Test error conditions y edge cases
-- Snapshot tests para PDF templates
-
-### Integration Tests
-- API endpoints con diferentes roles
-- Database operations
-- File upload/download
-- Email sending
-
-## Development Workflow
-
-### Container Development
-- **Development**: `docker-compose -f docker-compose.dev.yml up`
-- **Production**: `docker-compose up -d`
-- **Testing**: `docker-compose -f docker-compose.test.yml up`
-- **Logs**: `docker-compose logs -f [service]`
-- **Shell Access**: `docker exec -it sgmm_backend bash`
-
-### Operational Runbook (Dev/Prod)
-- **Reiniciar solo frontend (dev)**: `docker-compose -f docker-compose.dev.yml up -d --build frontend`
-- **Reiniciar solo frontend (prod)**: `docker-compose up -d --build frontend`
-- **Evitar** `down` global salvo mantenimiento planificado; tumba DB/Redis y corta 8080.
-- **Verificar salud**: `docker inspect -f '{{.State.Health.Status}}' sgmm_postgres* sgmm_redis*` y `curl http://localhost:8080/api/health`
-- **Orden de arranque (dev/prod)**: Postgres → Redis → Backend → Frontend
-
-### Atajos de orquestación
-- `make dev-up` / `make dev-down`
-- `make dev-restart-frontend`
-- `make prod-up` / `make prod-restart-frontend`
-- `make health`, `make logs-backend`, `make logs-frontend`
-
-### Git Conventions
-- Feature branches: `feature/employee-crud`
-- Bug fixes: `fix/pdf-generation-memory`
-- Commit messages: "feat: add employee document upload"
-- Container images: Tagged con commit SHA
-
-### Code Review
-- PR template con checklist
-- Security review para cambios auth/admin
-- Performance review para DB queries
-- **Container security**: Scan de imágenes obligatorio
-- Documentation update obligatoria
-
-### Deployment
-- **Docker Compose**: Orquestación de servicios
-- **Named Volumes**: Persistencia de datos críticos
-- **Health Checks**: Monitoreo automático de servicios
-- **Auto Restart**: Política always para servicios críticos
-- **Database migrations**: Ejecutadas en init containers
-- **Staging environment**: Compose profiles para diferentes ambientes
-- **Rollback plan**: Versionado de imágenes y backup de volúmenes
-
-## Documentation Requirements
-
-### Code Documentation
-- JSDoc para funciones públicas
-- README por módulo principal
-- API documentation con examples
-- Database schema documentation
-
-### User Documentation
-- Admin guides para cada panel
-- FAQ para usuarios finales
-- Troubleshooting guides
-- Feature release notes
-
-## Monitoring & Logging
-
-### Application Monitoring
-- Performance metrics (response times, memory usage)
-- Error tracking con stack traces
-- User activity monitoring
-- System health checks
-
-### Business Metrics
-- Employee completion rates
-- Document upload statistics
-- Email campaign performance
-- System usage by company
-
-## Common Patterns
-
-### Service Layer Pattern
-```typescript
-class EmployeeService {
-  constructor(
-    private employeeRepository: EmployeeRepository,
-    private auditService: AuditService
-  ) {}
-
-  async updateEmployee(id: string, data: UpdateEmployeeData, userId: string) {
-    const existing = await this.employeeRepository.findById(id);
-    const updated = await this.employeeRepository.update(id, data);
-    
-    await this.auditService.logChange('employees', id, existing, updated, userId);
-    
-    return updated;
-  }
-}
+#### **Frontend Structure**
+```
+frontend/
+├── src/
+│   ├── components/       # Componentes reutilizables
+│   ├── pages/           # Páginas de la aplicación
+│   ├── hooks/           # Custom hooks
+│   ├── services/        # Servicios de API
+│   ├── types/           # Tipos TypeScript
+│   ├── utils/           # Utilidades
+│   └── styles/          # Estilos globales
+└── docs/                # Documentación frontend
 ```
 
-### Error Handling Pattern
-```typescript
-try {
-  const result = await service.performOperation();
-  return { success: true, data: result };
-} catch (error) {
-  logger.error('Operation failed', { error, context });
-  
-  if (error instanceof BusinessError) {
-    return { success: false, error: error.message };
-  }
-  
-  throw error; // Let middleware handle unexpected errors
-}
-```
+### 5. REGLAS DE CÓDIGO
 
-## Forbidden Practices
+#### **TypeScript**
+- **STRICT MODE**: Siempre habilitado
+- **NO ANY**: Evitar tipo `any`, usar tipos específicos
+- **INTERFACES**: Preferir interfaces sobre types para objetos
+- **ENUMS**: Usar enums para valores constantes
+- **NULL SAFETY**: Manejar null/undefined explícitamente
+- **ASYNC/AWAIT**: Preferir sobre Promises.then()
 
-### Scope & Feature Creep
-- **NO agregar funcionalidades** no especificadas en requirements
-- **NO convertir** en sistema genérico de seguros o HR
-- **NO implementar** features "que estarían cool"
-- **NO complicar** flujos de usuario existentes
-- **NO añadir** configuraciones innecesarias
+#### **Error Handling**
+- **TRY-CATCH**: En todas las operaciones asíncronas
+- **CUSTOM ERRORS**: Crear errores específicos del dominio
+- **LOGGING**: Registrar errores con contexto suficiente
+- **USER-FRIENDLY**: Mostrar mensajes de error claros al usuario
 
-### UI/UX Anti-Patterns  
-- **NO usar** más de 4 colores simultáneamente en una vista
-- **NO crear** dashboards complejos con múltiples widgets
-- **NO implementar** animaciones innecesarias
-- **NO sobrecargar** interfaces con opciones
-- **NO usar** modals anidados o workflows complejos
+#### **Testing**
+- **UNIT TESTS**: Para lógica de negocio
+- **INTEGRATION TESTS**: Para APIs y servicios
+- **MOCKING**: Mockear dependencias externas
+- **COVERAGE**: Mantener cobertura > 80%
 
-### Business Logic
-- **NO expandir** alcance más allá de renovación SGMM
-- **NO agregar** gestión de otros tipos de seguros
-- **NO implementar** workflows de aprobación complejos
-- **NO crear** sistema de tickets o helpdesk
-- **NO añadir** funcionalidades de onboarding elaboradas
+### 6. REGLAS DE BASE DE DATOS
 
-## UI/UX Design System & Philosophy
+#### **Prisma ORM**
+- **SCHEMA FIRST**: Definir esquema antes de código
+- **MIGRATIONS**: Usar migraciones para cambios de BD
+- **VALIDATIONS**: Validaciones en esquema Prisma
+- **RELATIONS**: Definir relaciones explícitas
+- **INDEXES**: Crear índices para campos de búsqueda
 
-### 1. Core Philosophy
-- **Profesional y Limpio**: El objetivo es una interfaz que inspire confianza y eficiencia, no una que sea llamativa. Prioriza la claridad sobre la decoración.
-- **Consistencia**: Todos los elementos deben seguir las mismas reglas de diseño. Un botón debe verse y comportarse igual en toda la aplicación.
-- **Eficiencia del Usuario**: La interfaz debe minimizar la carga cognitiva. Los usuarios (empleados y RH) deben poder completar tareas de forma rápida e intuitiva, sin necesidad de adivinar.
-- **Accesibilidad (A11y)**: El diseño debe cumplir con las directrices WCAG AA. Esto incluye contraste de color, navegación por teclado y etiquetas ARIA adecuadas.
+#### **Queries**
+- **PARAMETERIZED**: Usar parámetros, nunca concatenación
+- **LIMITS**: Limitar resultados de consultas grandes
+- **PAGINATION**: Para listas grandes
+- **OPTIMIZATION**: Revisar performance de queries complejas
 
-### 2. Layout y Estructura
-- **Layout General**: Utilizar un diseño de aplicación estándar:
-  - **Header Fijo**: Branding y breadcrumbs. En `collaborator/:id` el breadcrumb muestra el nombre del colaborador (no el ID). El selector de compañía NO va en el header; vive solo en `/panel`.
-  - **Contenedor Principal**: El contenido principal no debe ocupar todo el ancho de la pantalla. Usar `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8` para centrarlo y darle márgenes adecuados.
-  - **Fondo**: El fondo de la página debe ser un gris muy claro (`bg-gray-100`) para que los elementos "card" resalten.
-- **Contenedores (Cards)**:
-  - Son el elemento principal para agrupar información.
-  - Deben tener `bg-white`, `rounded-lg`, `shadow-sm`, y un borde (`border border-gray-200`).
-  - Deben tener un espaciado interno consistente (`padding` de `p-6` o `p-8`).
-  - Un `Card` puede tener tres secciones: `Card.Header`, `Card.Body`, `Card.Footer`.
-    - `Card.Header`: Contiene el título de la sección y acciones (ej. botón "Añadir"). Fondo ligeramente distinto (`bg-gray-50`) y borde inferior.
-    - `Card.Footer`: Contiene los botones de acción principales (Guardar, Cancelar). Fondo igual al header y borde superior.
+### 7. REGLAS DE SEGURIDAD
 
-### 3. Sistema de Color y Theming
-- **Base**: La paleta de colores se define por compañía y se inyecta como variables CSS (`--color-primary`, `--color-secondary`, `--color-accent`, `--color-neutral`).
-- **Variables CSS Semánticas**: La IA debe aplicar los colores usando un sistema de variables semánticas.
-  - `--color-primary`: El color principal de la marca (`primary_color`).
-  - `--color-accent`: Para botones de acción, links y elementos interactivos (`accent_color`).
-  - `--color-text-default`: Texto principal (`neutral_color` oscuro, ej. `text-gray-800`).
-  - `--color-text-muted`: Texto secundario, labels, placeholders (`text-gray-500`).
-  - `--color-border-default`: Bordes de inputs y cards (`border-gray-300`).
-  - `--color-bg-subtle`: Fondos para headers de cards o filas de tablas activas (`bg-gray-50`).
-- **Ejemplo de uso en Tailwind**: `className="bg-[var(--color-primary)] text-white"`
-- **Estilos Globales (prioridad)**: Centralizar utilidades/tokens en `index.css` (`.card`, `.card-header`, `.form-control`, `.btn-*`, `.table-pro`, `.toast`). Evitar estilos ad-hoc por componente. Preparar multi-tenant: las compañías redefinen variables CSS/temas sin tocar componentes.
+#### **Autenticación**
+- **SAML**: Usar SAML con Google Workspace
+- **JWT**: Para sesiones después de SAML
+- **COOKIES**: HttpOnly, Secure, SameSite
+- **TIMEOUT**: Sesiones con expiración automática
 
-### 4. Tipografía
-- **Jerarquía Clara**:
-  - **Títulos de Página (h1)**: `text-2xl font-bold text-gray-900`.
-  - **Títulos de Card (h2)**: `text-lg font-semibold text-gray-800`.
-  - **Texto de Párrafo (p)**: `text-base text-gray-700`.
-  - **Labels de Formularios**: `text-sm font-medium text-gray-600`.
-  - **Texto de Ayuda/Secundario**: `text-sm text-gray-500`.
-- **Fuentes**: Usar las fuentes definidas por compañía (`font_primary`, `font_secondary`) a través de variables CSS. Si no están definidas, usar una pila de fuentes sans-serif segura para web (`Inter`, `system-ui`, `sans-serif`).
+#### **Autorización**
+- **ROLE-BASED**: Sistema de roles (EMPLOYEE, HR_ADMIN, SUPER_ADMIN)
+- **RESOURCE-BASED**: Empleados solo ven sus propios datos
+- **MIDDLEWARE**: Validar permisos en cada endpoint
 
-### 5. Diseño de Componentes Específicos
+#### **Datos Sensibles**
+- **ENCRYPTION**: Datos sensibles encriptados
+- **AUDIT TRAIL**: Registrar todas las acciones
+- **PRIVACY**: Aceptación de aviso de privacidad obligatoria
+- **SOFT DELETE**: Nunca eliminación física
 
-#### Formularios (Inputs, Selects, Labels)
-- **Labels**: Siempre visibles, posicionadas encima del campo. `className="block text-sm font-medium text-gray-700 mb-1"`.
-- **Inputs & Selects**:
-  - **Estilo Base**: `className="block w-full rounded-md border-gray-300 shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] sm:text-sm"`
-  - **Padding**: `px-3 py-2`.
-  - **Deshabilitado**: `disabled:bg-gray-100 disabled:cursor-not-allowed`.
-- **Layout de Formulario**: Usar `grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3`. Los campos relacionados deben estar agrupados visualmente.
-- **Validación de Errores**:
-  - El input debe tener un borde rojo: `border-red-500`.
-  - Mostrar un mensaje de error debajo del campo: `className="mt-1 text-sm text-red-600"`.
-  - NO usar `alert()` para mostrar errores de validación.
+### 8. REGLAS DE ARCHIVOS Y DOCUMENTOS
 
-#### Botones
-- **Variantes**: Deben existir al menos 3 variantes claras.
-  - **Primario**: Para la acción principal (Guardar, Enviar). `className="btn-primary bg-[var(--color-accent)] text-white hover:bg-opacity-90 disabled:bg-gray-300"`
-  - **Secundario**: Para acciones secundarias (Cancelar, Volver). `className="btn-secondary bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 disabled:opacity-75"`
-  - **Destructivo**: Para acciones peligrosas (Eliminar). `className="btn-danger bg-red-600 text-white hover:bg-red-700 disabled:bg-red-300"`
-- **Estilos Comunes**: Todos los botones deben tener `rounded-md`, `font-semibold`, `px-4 py-2`, y transiciones suaves (`transition-colors`).
+#### **Google Drive Integration**
+- **STRUCTURE**: Organizar por empleado/dependiente
+- **NAMING**: Usar ID compuesto (3619-a01)
+- **VALIDATION**: Validar tamaño y tipo de archivo
+- **SECURITY**: Control de acceso por roles
 
-#### Tablas
-- **Estructura**: `<table>` con `<thead>` y `<tbody>`.
-- **Header (`<thead>`)**: `className="bg-gray-50"`. Las celdas `<th>` deben tener `text-left text-sm font-semibold text-gray-600`.
-- **Filas (`<tr>`)**: Con borde inferior `border-b`. Añadir un efecto hover: `hover:bg-gray-50`.
-- **Celdas (`<td>`)**: `text-sm text-gray-700`.
-- **Acciones**: La última columna debe contener icon-buttons (Editar, Eliminar). La columna "Acta" muestra estado textual: "Completo"/"Pendiente" (colaborador = "-").
+#### **File Upload**
+- **MAX SIZE**: 5MB por archivo
+- **ALLOWED TYPES**: PDF, JPG, JPEG, PNG
+- **FIRST TIME**: Upload obligatorio para dependientes nuevos
+- **METADATA**: Guardar información de upload
 
-### 6. Feedback y Estados de Interacción
-- **Estados de Carga (Loading)**:
-  - Reemplazar texto "Cargando..." con **componentes skeleton**. Para una tabla, mostrar filas de esqueleto. Para un formulario, mostrar los inputs en estado deshabilitado con un fondo de esqueleto animado.
-  - En botones, al hacer click para guardar, el botón debe mostrar un spinner y deshabilitarse. El texto puede cambiar de "Guardar" a "Guardando...".
-- **Notificaciones (Toasts)**:
-  - Reemplazar `alert()` para confirmaciones de éxito o error.
-  - Usar un sistema de "toasts" o notificaciones no intrusivas en una esquina de la pantalla.
-  - **Éxito**: Fondo verde (`bg-green-500`).
-  - **Error**: Fondo rojo (`bg-red-600`).
-  - **Información**: Fondo azul (`bg-blue-500`).
-- **Estados Vacíos (Empty States)**:
-  - Cuando una tabla (ej. de dependientes) no tiene datos, no mostrar una tabla vacía. Mostrar un componente de "estado vacío" con un ícono, un título (ej. "No hay dependientes registrados") y un botón de acción para añadir el primero.
+### 9. REGLAS DE REPORTES
 
-### 7. Responsividad (Smartphone & Tablet)
-- Debe ser totalmente responsivo con foco en tablets (70% de usuarios) y soporte móvil.
-- Reglas rápidas:
-  - Formularios: `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`; selects con `min-w-[12rem]` cuando aplique.
-  - Tablas: envolver en clase `.table-responsive` con `overflow-x:auto` en vistas largas; en móviles se permite scroll horizontal.
-  - Icon-buttons: ampliar área táctil en pantallas pequeñas (`.icon-btn` con `p-2` en `md:` hacia abajo) y mantener tooltips.
-  - Tipografía: `text-sm` base; `md:text-base` a partir de pantallas medianas.
-  - Header/Footer fijos: asegurar `pt-*`/`pb-*` suficientes en `<main>` para no tapar contenido.
-  - Pruebas objetivo: iPad 768x1024 (portrait/landscape), 1280x800 (Android tablets), 390x844 (iPhone 12+).
+#### **Generación**
+- **ON-DEMAND**: Generar dinámicamente, no almacenar
+- **VIEWS**: Usar vistas SQL para reportes complejos
+- **FORMATS**: Excel, PDF, CSV
+- **FILTERING**: Por compañía, fecha, estado
+
+#### **Tipos de Reporte**
+- **INSURER**: Para aseguradora con todos los dependientes
+- **PAYROLL_DEDUCTIONS**: Para nóminas con dependientes extra
+- **AUDIT**: Trail de auditoría para RH
+
+### 10. REGLAS DE PERFORMANCE
+
+#### **Backend**
+- **CACHING**: Cache para datos frecuentemente accedidos
+- **PAGINATION**: Para listas grandes
+- **LAZY LOADING**: Cargar datos bajo demanda
+- **INDEXING**: Índices en campos de búsqueda
+
+#### **Frontend**
+- **CODE SPLITTING**: Dividir código por rutas
+- **LAZY LOADING**: Cargar componentes bajo demanda
+- **OPTIMIZATION**: Optimizar imágenes y assets
+- **BUNDLING**: Usar bundling eficiente
+
+### 11. REGLAS DE DEPLOYMENT
+
+#### **Docker**
+- **MULTI-STAGE**: Builds optimizados
+- **SECRETS**: Variables de entorno para secretos
+- **HEALTH CHECKS**: Verificar salud de contenedores
+- **LOGGING**: Configurar logging centralizado
+
+#### **Environment**
+- **SEPARATION**: Dev, Staging, Production
+- **CONFIG**: Variables de entorno para configuración
+- **SECRETS**: Nunca hardcodear secretos
+- **BACKUPS**: Backup automático de BD
+
+### 12. REGLAS DE COMMITS Y VERSIONADO
+
+#### **Git Commits**
+- **CONVENTIONAL**: Usar Conventional Commits
+- **ATOMIC**: Un commit = una funcionalidad
+- **DESCRIPTIVE**: Mensajes claros y descriptivos
+- **SIGNED**: Firmar commits cuando sea posible
+
+#### **Versionado**
+- **SEMANTIC**: Semantic Versioning (MAJOR.MINOR.PATCH)
+- **CHANGELOG**: Mantener changelog actualizado
+- **TAGS**: Tag releases importantes
+
+### 13. REGLAS DE MONITOREO Y LOGGING
+
+#### **Logging**
+- **STRUCTURED**: JSON logs para parsing
+- **LEVELS**: DEBUG, INFO, WARN, ERROR
+- **CONTEXT**: Incluir contexto suficiente
+- **CORRELATION**: IDs de correlación para traces
+
+#### **Monitoring**
+- **METRICS**: Métricas de performance y uso
+- **ALERTS**: Alertas para errores críticos
+- **DASHBOARDS**: Dashboards para monitoreo
+- **HEALTH**: Health checks automáticos
+
+### 14. REGLAS DE DOCUMENTACIÓN
+
+#### **Code Documentation**
+- **JSDoc**: Documentar funciones públicas
+- **README**: README actualizado por módulo
+- **API DOCS**: Documentación de APIs
+- **ARCHITECTURE**: Documentar decisiones arquitectónicas
+
+#### **User Documentation**
+- **USER STORIES**: Historias de usuario claras
+- **REQUIREMENTS**: RF y RNF documentados
+- **MANUALS**: Manuales de usuario
+- **FAQ**: Preguntas frecuentes
+
+### 15. REGLAS DE CALIDAD
+
+#### **Code Quality**
+- **LINTING**: ESLint, Prettier configurados
+- **FORMATTING**: Formato consistente
+- **COMPLEXITY**: Evitar complejidad ciclomática alta
+- **DUPLICATION**: Evitar código duplicado
+
+#### **Reviews**
+- **PULL REQUESTS**: Review obligatorio
+- **CHECKLIST**: Checklist de review
+- **TESTING**: Verificar que tests pasen
+- **DOCUMENTATION**: Verificar documentación actualizada
+
+---
+
+## 🚨 VALIDACIONES OBLIGATORIAS ANTES DE COMMIT
+
+### **Backend**
+- [ ] Tests unitarios pasan
+- [ ] Tests de integración pasan
+- [ ] Linting sin errores
+- [ ] Tipos TypeScript correctos
+- [ ] Documentación actualizada
+- [ ] Schema Prisma validado
+- [ ] Migraciones aplicadas
+
+### **Frontend**
+- [ ] Componentes renderizan correctamente
+- [ ] Tests unitarios pasan
+- [ ] Linting sin errores
+- [ ] Tipos TypeScript correctos
+- [ ] Responsive design verificado
+- [ ] Accesibilidad básica verificada
+
+### **General**
+- [ ] Funcionalidad probada manualmente
+- [ ] Performance aceptable
+- [ ] Seguridad verificada
+- [ ] Documentación actualizada
+- [ ] Commits atómicos y descriptivos
+
+---
+
+## 📋 CHECKLIST DE ANÁLISIS ANTES DE CAMBIOS
+
+### **Impacto**
+- [ ] ¿Qué módulos se ven afectados?
+- [ ] ¿Qué dependencias externas hay?
+- [ ] ¿Qué APIs cambian?
+- [ ] ¿Qué base de datos se modifica?
+
+### **Arquitectura**
+- [ ] ¿Sigue principios SOLID?
+- [ ] ¿Mantiene clean architecture?
+- [ ] ¿No viola separación de capas?
+- [ ] ¿Es testable?
+
+### **Seguridad**
+- [ ] ¿Se validan inputs?
+- [ ] ¿Se manejan errores correctamente?
+- [ ] ¿Se registra en audit trail?
+- [ ] ¿Se respetan permisos?
+
+### **Performance**
+- [ ] ¿Se optimizan queries?
+- [ ] ¿Se usa caching cuando corresponde?
+- [ ] ¿Se evitan N+1 queries?
+- [ ] ¿Se limitan resultados?
+
+---
+
+## 🎯 OBJETIVOS DE CALIDAD
+
+- **Cobertura de tests**: > 80%
+- **Performance**: < 2s respuesta API
+- **Disponibilidad**: 99.9%
+- **Seguridad**: 0 vulnerabilidades críticas
+- **Mantenibilidad**: Complejidad ciclomática < 10
+- **Documentación**: 100% de APIs documentadas
+
+---
+
+*Última actualización: 2025-01-15*
+*Versión: 1.0*
+*Responsable: Equipo de Desarrollo SGMM*

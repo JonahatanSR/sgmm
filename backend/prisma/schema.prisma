@@ -60,6 +60,11 @@ model Employee {
   org_unit_path       String?
   policy_number       String?
   status              EmployeeStatus @default(ACTIVE)
+  // Campos de trazabilidad
+  last_login          DateTime?
+  login_count         Int           @default(0)
+  last_ip_address     String?
+  last_user_agent     String?
   created_at          DateTime      @default(now())
   updated_at          DateTime      @updatedAt
 
@@ -68,6 +73,9 @@ model Employee {
   dependents          Dependent[]
   documents           Document[]
   audit_logs          AuditLog[]
+  privacy_acceptances PrivacyAcceptance[]
+  user_sessions       UserSession[]
+  reports             Report[]
 
   @@map("employees")
 }
@@ -87,6 +95,9 @@ model Dependent {
   policy_end_date     DateTime?
   deleted_at          DateTime?
   status              DependentStatus  @default(ACTIVE)
+  is_first_time       Boolean          @default(false)
+  created_by          String?
+  deleted_by          String?
   created_at          DateTime         @default(now())
   updated_at          DateTime         @updatedAt
 
@@ -94,6 +105,7 @@ model Dependent {
   employee            Employee         @relation(fields: [employee_id], references: [id], onDelete: Cascade)
   relationship_type   RelationshipType @relation(fields: [relationship_type_id], references: [id])
   documents           Document[]
+  privacy_acceptances PrivacyAcceptance[]
 
   @@map("dependents")
   @@index([employee_id, dependent_seq])
@@ -318,4 +330,79 @@ enum ValueType {
   NUMBER
   BOOLEAN
   DATE
+}
+
+// ============================================================================
+// PRIVACY & SESSION ENTITIES
+// ============================================================================
+
+model PrivacyAcceptance {
+  id               String    @id @default(cuid())
+  employee_id      String
+  dependent_id     String?
+  acceptance_type  String    // 'EMPLOYEE' o 'DEPENDENT'
+  privacy_version  String    @default("v1.0")
+  accepted_at      DateTime  @default(now())
+  ip_address       String
+  user_agent       String
+  created_at       DateTime  @default(now())
+
+  // Relations
+  employee         Employee  @relation(fields: [employee_id], references: [id], onDelete: Cascade)
+  dependent        Dependent? @relation(fields: [dependent_id], references: [id], onDelete: Cascade)
+
+  @@map("privacy_acceptances")
+  @@index([employee_id])
+  @@index([dependent_id])
+  @@index([acceptance_type])
+}
+
+model UserSession {
+  id             String    @id @default(cuid())
+  employee_id    String
+  session_token  String    @unique
+  ip_address     String
+  user_agent     String
+  created_at     DateTime  @default(now())
+  expires_at     DateTime
+  last_activity  DateTime  @default(now())
+  is_active      Boolean   @default(true)
+
+  // Relations
+  employee       Employee  @relation(fields: [employee_id], references: [id], onDelete: Cascade)
+
+  @@map("user_sessions")
+  @@index([employee_id])
+  @@index([session_token])
+  @@index([expires_at])
+}
+
+// ============================================================================
+// REPORTS ENTITIES
+// ============================================================================
+
+model Report {
+  id             String    @id @default(cuid())
+  employee_id    String?
+  report_type    String    // 'INSURER', 'PAYROLL_DEDUCTIONS', 'EMPLOYEE_SUMMARY'
+  report_name    String
+  generated_at   DateTime  @default(now())
+  status         String    @default("PENDING") // 'PENDING', 'GENERATING', 'COMPLETED', 'FAILED'
+  file_path      String?
+  file_size      Int?
+  download_count Int       @default(0)
+  generated_by   String
+  parameters     Json?     // Parámetros usados para generar el reporte
+  error_message  String?
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+
+  // Relations
+  employee       Employee? @relation(fields: [employee_id], references: [id], onDelete: SetNull)
+
+  @@map("reports")
+  @@index([employee_id])
+  @@index([report_type])
+  @@index([status])
+  @@index([generated_at])
 }

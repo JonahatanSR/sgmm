@@ -26,7 +26,8 @@ export async function employeeRoutes(app: FastifyInstance) {
   };
 
   const searchHandler = async (req: any, reply: any) => {
-    const { query, companyId } = req.query as { query?: string; companyId?: string };
+    const query = req.query?.q || req.query?.query;
+    const companyId = req.query?.companyId;
     if (!query || query.trim().length < 3) {
       return reply.code(400).send({ message: 'query>=3 es requerido' });
     }

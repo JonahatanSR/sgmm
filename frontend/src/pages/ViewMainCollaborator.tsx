@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { apiGet, apiDelete } from '../services/api';
 import { useState } from 'react';
 import Modal from '../components/Modal';
 import SectionHeader from '../components/SectionHeader';
+import { useAuth } from '../hooks/useAuth';
 
 type Summary = {
   employee: {
@@ -27,9 +28,16 @@ type Summary = {
 
 export default function ViewMainCollaborator() {
   const { id = '' } = useParams();
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
+  
+  // Si no hay ID en la URL pero hay usuario autenticado, usar el ID del usuario
+  const employeeId = id || user?.id || '';
+  
   const { data, isLoading, error, refetch } = useQuery<Summary>({
-    queryKey: ['collaborator', id],
-    queryFn: () => apiGet<Summary>(`/api/collaborator/${id}/summary`),
+    queryKey: ['collaborator', employeeId],
+    queryFn: () => apiGet<Summary>(`/api/collaborator/${employeeId}/summary`),
+    enabled: !!employeeId, // Solo ejecutar si hay un ID
   });
   const { data: relTypes } = useQuery<{ id: number; name: string }[]>({
     queryKey: ['relationship-types'],
@@ -61,9 +69,15 @@ export default function ViewMainCollaborator() {
   // Hooks deben declararse antes de cualquier return condicional
   const [toDelete, setToDelete] = useState<{ id: string; name: string } | null>(null);
 
-  if (!id) return <div className="p-6">Falta id de colaborador en la ruta.</div>;
-  if (isLoading) return <div className="p-6">Cargando...</div>;
-  if (error) return <div className="p-6">Error cargando datos.</div>;
+  // Si no hay ID y no está autenticado, redirigir al login
+  if (!employeeId && !isAuthenticated) {
+    navigate('/login');
+    return <div className="p-6">Redirigiendo al login...</div>;
+  }
+  
+  if (isLoading) return <div className="p-6">Cargando información del colaborador...</div>;
+  if (error) return <div className="p-6">Error cargando datos del colaborador.</div>;
+  if (!data) return <div className="p-6">No se encontraron datos del colaborador.</div>;
 
   const e = data!.employee;
   const active = data!.dependents.active;
@@ -104,9 +118,9 @@ export default function ViewMainCollaborator() {
           </div>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
-          <button className="btn-secondary" onClick={() => (window.location.href = `/collaborator/${id}/edit`)}>Editar</button>
-          <button className="btn-secondary" onClick={() => window.location.href = `/dependents/new/${id}`}>Añadir dependiente</button>
-          <button className="btn-secondary" onClick={() => window.open(`/api/pdf/renewal-form?employeeId=${id}`, '_blank')}>Generar PDF</button>
+          <button className="btn-secondary" onClick={() => navigate(`/collaborator/${employeeId}/edit`)}>Editar</button>
+          <button className="btn-secondary" onClick={() => navigate(`/dependents/new/${employeeId}`)}>Añadir dependiente</button>
+          <button className="btn-secondary" onClick={() => window.open(`/api/pdf/renewal-form?employeeId=${employeeId}`, '_blank')}>Generar PDF</button>
           <button className="btn-secondary" onClick={() => refetch()}>Actualizar</button>
         </div>
       </div>

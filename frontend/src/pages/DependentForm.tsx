@@ -21,6 +21,8 @@ export default function DependentForm() {
   const navigate = useNavigate()
   const { id, employeeId } = useParams()
   const isEdit = Boolean(id)
+  
+  const [privacyAccepted, setPrivacyAccepted] = useState(false)
 
   const { data: relTypes } = useQuery<{ id: number; name: string }[]>({
     queryKey: ['relationship-types'],
@@ -66,9 +68,10 @@ export default function DependentForm() {
       form.paternal_last_name.trim() &&
       form.gender &&
       form.birth_date &&
-      Number.isFinite(Number(form.relationship_type_id))
+      Number.isFinite(Number(form.relationship_type_id)) &&
+      privacyAccepted
     )
-  }, [form])
+  }, [form, privacyAccepted])
 
   const [toasts, setToasts] = useState<Toast[]>([])
   const pushToast = (message: string) => {
@@ -172,11 +175,48 @@ export default function DependentForm() {
           </div>
         </div>
 
-        <div className="card-footer flex gap-2 justify-end">
-          <button className="btn-primary" disabled={!valid || saveMutation.isPending} onClick={() => saveMutation.mutate()}>
-            {saveMutation.isPending ? 'Guardando…' : 'Guardar'}
-          </button>
-          <button className="btn-secondary" onClick={() => navigate(-1)}>Cancelar</button>
+        {/* Aviso de Privacidad */}
+        <div className="card-footer border-t border-gray-200 pt-4">
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-4">
+            <div className="flex items-start space-x-3">
+              <input
+                type="checkbox"
+                id="privacy-acceptance"
+                checked={privacyAccepted}
+                onChange={(e) => setPrivacyAccepted(e.target.checked)}
+                className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <div className="flex-1">
+                <label htmlFor="privacy-acceptance" className="text-sm text-gray-700 cursor-pointer">
+                  He leído y acepto el{' '}
+                  <a 
+                    href="/privacy-policy" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 underline font-medium"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Aviso de Privacidad
+                  </a>{' '}
+                  de Siegfried Rhein, S.A. de C.V. para el tratamiento de los datos personales 
+                  del dependiente con la finalidad de gestionar la inscripción, actualización, 
+                  altas y bajas en el seguro de gastos médicos mayores.
+                </label>
+                {!privacyAccepted && (
+                  <p className="text-xs text-red-600 mt-1">
+                    Debes aceptar el aviso de privacidad para continuar.
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex gap-2 justify-end">
+            <button className="btn-primary" disabled={!valid || saveMutation.isPending} onClick={() => saveMutation.mutate()}>
+              {saveMutation.isPending ? 'Guardando…' : 'Guardar'}
+            </button>
+            <button className="btn-secondary" onClick={() => navigate(-1)}>Cancelar</button>
+          </div>
         </div>
       </div>
 

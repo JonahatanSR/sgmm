@@ -8,7 +8,7 @@ import { env } from './environment';
 export const samlStrategy = new Strategy(
   {
     // URL donde Google enviará la respuesta SAML
-    callbackUrl: 'https://sgmm.portalapps.mx/api/auth/saml/callback',
+    callbackUrl: env.SAML_CALLBACK_URL,
     
     // URL de entrada del proveedor SAML (Google Workspace)
     entryPoint: env.SAML_ENTRY_POINT,
@@ -19,10 +19,13 @@ export const samlStrategy = new Strategy(
     // Certificado público de Google para verificar las respuestas
     idpCert: env.SAML_CERT,
     
+    // Formato del identificador de usuario (NameID)
+    identifierFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress',
+    
     // Configuraciones adicionales
-    wantAssertionsSigned: true,
-    wantAuthnResponseSigned: true,
-    acceptedClockSkewMs: -1, // No permitir diferencia de tiempo
+    wantAssertionsSigned: false, // Temporalmente deshabilitado para debugging
+    wantAuthnResponseSigned: false, // Temporalmente deshabilitado para debugging
+    acceptedClockSkewMs: 30000, // 30 segundos de tolerancia para problemas de sincronización
     disableRequestedAuthnContext: true,
     signatureAlgorithm: 'sha256',
     digestAlgorithm: 'sha256',
@@ -34,14 +37,22 @@ export const samlStrategy = new Strategy(
    */
   (profile: any, done: (err: any, user?: any, info?: any) => void) => {
     try {
-      // Log del perfil recibido para debugging
-      console.log('SAML Profile received:', JSON.stringify(profile, null, 2));
+      // 🔍 LOGS DETALLADOS PARA DIAGNÓSTICO SAML
+      console.log('=== INICIO PROCESAMIENTO PERFIL SAML ===');
+      console.log('📋 Perfil completo recibido:', JSON.stringify(profile, null, 2));
+      console.log('📧 Email extraído:', profile['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress']);
+      console.log('🆔 NameID:', profile.nameID);
+      console.log('🏢 Dominio:', profile['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn']);
+      console.log('👤 Nombre completo:', profile['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name']);
+      console.log('⏰ Timestamp:', new Date().toISOString());
+      console.log('=== FIN PROCESAMIENTO PERFIL SAML ===');
       
       // Por ahora, simplemente retornamos el perfil
       // En el siguiente paso, aquí procesaremos el perfil y crearemos/actualizaremos el usuario
       return done(null, profile);
-    } catch (error) {
-      console.error('Error processing SAML profile:', error);
+    } catch (error: any) {
+      console.error('❌ Error processing SAML profile:', error);
+      console.error('❌ Stack trace:', error.stack);
       return done(error, null);
     }
   },

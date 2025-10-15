@@ -18,6 +18,7 @@ export interface Employee {
 export interface EmployeeRepository {
   findById(id: string): Promise<Employee | null>;
   findByEmail(email: string): Promise<Employee | null>;
+  findByEmployeeNumber(employeeNumber: string): Promise<Employee | null>;
   update(id: string, data: Partial<Employee>): Promise<Employee>;
   search?(query: string, companyId: string): Promise<Employee[]>;
 }

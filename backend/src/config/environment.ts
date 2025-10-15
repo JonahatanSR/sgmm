@@ -25,7 +25,9 @@ export interface IEnvironmentConfig {
   // SAML
   SAML_ENTRY_POINT: string;
   SAML_ISSUER: string;
+  SAML_CALLBACK_URL: string;
   SAML_CERT: string;
+  DISABLE_AUTH: boolean;
 
   // CORS
   CORS_ORIGIN: string;
@@ -54,7 +56,9 @@ class EnvironmentConfig implements IEnvironmentConfig {
   public readonly SESSION_SECRET: string;
   public readonly SAML_ENTRY_POINT: string;
   public readonly SAML_ISSUER: string;
+  public readonly SAML_CALLBACK_URL: string;
   public readonly SAML_CERT: string;
+  public readonly DISABLE_AUTH: boolean;
   public readonly CORS_ORIGIN: string;
   public readonly MAX_FILE_SIZE: number;
   public readonly UPLOAD_DIR: string;
@@ -79,7 +83,9 @@ class EnvironmentConfig implements IEnvironmentConfig {
 
     this.SAML_ENTRY_POINT = this.getRequiredEnvVar('SAML_ENTRY_POINT');
     this.SAML_ISSUER = this.getRequiredEnvVar('SAML_ISSUER');
+    this.SAML_CALLBACK_URL = this.getRequiredEnvVar('SAML_CALLBACK_URL');
     this.SAML_CERT = this.getRequiredEnvVar('SAML_CERT');
+    this.DISABLE_AUTH = process.env.DISABLE_AUTH === 'true';
 
     this.CORS_ORIGIN = process.env.CORS_ORIGIN || '*'; // Permitir acceso desde cualquier origen en desarrollo
 
