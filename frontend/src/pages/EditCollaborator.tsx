@@ -16,17 +16,24 @@ export default function EditCollaborator() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
   
+  console.log('EditCollaborator - ID from params:', id);
+  
   // Obtener datos del colaborador usando el endpoint de summary
-  const { data: summaryData, isLoading: summaryLoading } = useQuery({
+  const { data: summaryData, isLoading: summaryLoading, error: summaryError } = useQuery({
     queryKey: ['collaborator', id],
     queryFn: () => apiGet(`/api/collaborator/${id}/summary`),
+    enabled: !!id, // Solo ejecutar si hay un ID
   })
+  
+  console.log('EditCollaborator - Summary data:', summaryData);
+  console.log('EditCollaborator - Summary error:', summaryError);
 
   const [form, setForm] = useState<Employee>({ id })
   
   useEffect(() => {
     if (summaryData?.employee) {
       const emp = summaryData.employee;
+      console.log('Setting form with employee data:', emp);
       setForm({
         id: emp.id,
         first_name: emp.first_name,
@@ -45,7 +52,10 @@ export default function EditCollaborator() {
       alert('Datos actualizados correctamente'); 
       navigate(`/collaborator/${id}`) 
     },
-    onError: () => alert('Error al actualizar. Revisa los datos.'),
+    onError: (error) => {
+      console.error('Error updating employee:', error);
+      alert('Error al actualizar. Revisa los datos.');
+    },
   })
 
   if (summaryLoading) return <div className="p-6">Cargando datos del colaborador…</div>
