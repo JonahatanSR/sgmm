@@ -12,6 +12,14 @@ type Employee = {
   birth_date?: string | null
 }
 
+type SummaryData = {
+  employee: Employee
+  dependents: {
+    active: any[]
+    inactive: any[]
+  }
+}
+
 export default function EditCollaborator() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
@@ -19,9 +27,9 @@ export default function EditCollaborator() {
   console.log('EditCollaborator - ID from params:', id);
   
   // Obtener datos del colaborador usando el endpoint de summary
-  const { data: summaryData, isLoading: summaryLoading, error: summaryError } = useQuery({
+  const { data: summaryData, isLoading: summaryLoading, error: summaryError } = useQuery<SummaryData>({
     queryKey: ['collaborator', id],
-    queryFn: () => apiGet(`/api/collaborator/${id}/summary`),
+    queryFn: () => apiGet<SummaryData>(`/api/collaborator/${id}/summary`),
     enabled: !!id, // Solo ejecutar si hay un ID
   })
   
