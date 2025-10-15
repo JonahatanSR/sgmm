@@ -290,3 +290,4 @@ curl -X GET /api/audit-trails \
 - ⏳ Errores TypeScript en compliance: < 5
 - ⏳ Cobertura de tests: > 80%
 - ⏳ Documentación actualizada: 100%
+

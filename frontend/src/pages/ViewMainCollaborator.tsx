@@ -5,6 +5,7 @@ import { useState } from 'react';
 import Modal from '../components/Modal';
 import SectionHeader from '../components/SectionHeader';
 import { useAuth } from '../hooks/useAuth';
+import { usePDFGeneration } from '../hooks/usePDFGeneration';
 
 type Summary = {
   employee: {
@@ -46,6 +47,12 @@ export default function ViewMainCollaborator() {
     gcTime: 0,
   });
 
+  // Hook para generación de PDFs
+  const { generatePDF, isGenerating: isGeneratingPDF } = usePDFGeneration();
+  
+  // Hook para obtener datos del PDF (usando datos existentes)
+  // const { data: pdfData, isLoading: isLoadingPDFData } = usePDFData(employeeId);
+
   const relMap = new Map<number, string>((relTypes || []).map(r => [r.id, r.name]));
 
   const formatDate = (iso?: string) => {
@@ -69,6 +76,114 @@ export default function ViewMainCollaborator() {
 
   // Hooks deben declararse antes de cualquier return condicional
   const [toDelete, setToDelete] = useState<{ id: string; name: string } | null>(null);
+
+  // Función para generar PDF
+  const handleGeneratePDF = async () => {
+    if (!data || !relTypes) return;
+
+    try {
+      // Preparar datos para el PDF usando datos existentes
+      const pdfData = {
+        employee: {
+          id: data.employee.id,
+          google_id: undefined,
+          email: data.employee.email,
+          full_name: data.employee.full_name,
+          first_name: data.employee.first_name || undefined,
+          paternal_last_name: data.employee.paternal_last_name || undefined,
+          maternal_last_name: data.employee.maternal_last_name || undefined,
+          birth_date: data.employee.birth_date,
+          gender: data.employee.gender || 'M',
+          hire_date: data.employee.hire_date || '',
+          company_id: data.employee.company_id,
+          department: undefined,
+          position: undefined,
+          policy_number: undefined,
+          status: 'ACTIVE' as const,
+          last_login: undefined,
+          login_count: 0,
+          last_ip_address: undefined,
+          last_user_agent: undefined,
+          created_at: '',
+          updated_at: ''
+        },
+        dependents: [
+          ...data.dependents.active.map(dep => ({
+            id: dep.id,
+            dependent_id: dep.dependent_id || dep.id,
+            employee_id: data.employee.id,
+            first_name: dep.first_name,
+            paternal_last_name: dep.paternal_last_name,
+            maternal_last_name: dep.maternal_last_name || undefined,
+            birth_date: dep.birth_date,
+            gender: dep.gender,
+            relationship_type_id: dep.relationship_type_id.toString(),
+            relationship_type_name: relMap.get(dep.relationship_type_id) || 'Desconocido',
+            policy_start_date: dep.policy_start_date,
+            policy_end_date: undefined,
+            status: 'ACTIVE' as const,
+            created_by: data.employee.id,
+            created_at: '',
+            updated_at: '',
+            deleted_at: undefined
+          })),
+          ...data.dependents.inactive.map(dep => ({
+            id: dep.id,
+            dependent_id: dep.dependent_id || dep.id,
+            employee_id: data.employee.id,
+            first_name: dep.first_name,
+            paternal_last_name: dep.paternal_last_name,
+            maternal_last_name: dep.maternal_last_name || undefined,
+            birth_date: dep.birth_date,
+            gender: dep.gender,
+            relationship_type_id: dep.relationship_type_id.toString(),
+            relationship_type_name: relMap.get(dep.relationship_type_id) || 'Desconocido',
+            policy_start_date: dep.policy_start_date,
+            policy_end_date: dep.policy_end_date,
+            status: 'INACTIVE' as const,
+            created_by: data.employee.id,
+            created_at: '',
+            updated_at: '',
+            deleted_at: undefined
+          }))
+        ],
+        relationshipTypes: relTypes.map(rt => ({
+          id: rt.id.toString(),
+          name: rt.name,
+          description: undefined,
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })),
+        company: {
+          id: data.employee.company_id,
+          name: 'Siegfried Rhein',
+          code: 'SR-001',
+          logo_url: undefined,
+          primary_color: '#3498db',
+          secondary_color: '#2c3e50',
+          contact_email: undefined,
+          contact_phone: undefined,
+          address: undefined,
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        generatedAt: new Date().toISOString(),
+        generatedBy: data.employee.id
+      };
+
+      // Generar PDF con datos preparados
+      await generatePDF(pdfData, {
+        includeSignature: true,
+        includeCompanyLogo: false,
+        includeAuditInfo: true
+      });
+
+    } catch (error) {
+      console.error('Error generando PDF:', error);
+    }
+  };
 
   // Si no hay ID y no está autenticado, redirigir al login
   if (!employeeId && !isAuthenticated) {
@@ -121,7 +236,13 @@ export default function ViewMainCollaborator() {
         <div className="mt-4 flex flex-wrap gap-2">
           <button className="btn-secondary" onClick={() => navigate(`/collaborator/${employeeId}/edit`)}>Editar</button>
           <button className="btn-secondary" onClick={() => navigate(`/dependents/new/${employeeId}`)}>Añadir dependiente</button>
-          <button className="btn-secondary" onClick={() => window.open(`/api/pdf/renewal-form?employeeId=${employeeId}`, '_blank')}>Generar PDF</button>
+          <button 
+            className="btn-secondary" 
+            onClick={handleGeneratePDF}
+            disabled={isGeneratingPDF || !data || !relTypes}
+          >
+            {isGeneratingPDF ? 'Generando PDF...' : 'Generar PDF'}
+          </button>
           <button className="btn-secondary" onClick={() => refetch()}>Actualizar</button>
         </div>
       </div>

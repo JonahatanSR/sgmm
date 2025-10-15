@@ -1,0 +1,371 @@
+/* Estilos para la plantilla de PDF - Tamaño Carta (8.5" x 11") */
+
+/* Reset y configuración base */
+.pdf-template * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.pdf-template {
+  font-family: 'Arial', 'Helvetica', sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #333;
+  background: #fff;
+  width: 816px; /* 8.5" * 96 DPI */
+  min-height: 1056px; /* 11" * 96 DPI */
+  margin: 0 auto;
+  padding: 40px;
+  position: relative;
+}
+
+/* Encabezado */
+.pdf-template .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.pdf-template .logo-section {
+  display: flex;
+  align-items: center;
+}
+
+.pdf-template .logo {
+  width: 60px;
+  height: 60px;
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  font-size: 10px;
+  color: #666;
+  border-radius: 4px;
+}
+
+.pdf-template .company-info h1 {
+  font-size: 18px;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 5px;
+}
+
+.pdf-template .company-info p {
+  font-size: 10px;
+  color: #666;
+}
+
+.pdf-template .generation-info {
+  text-align: right;
+  font-size: 10px;
+  color: #666;
+}
+
+/* Secciones */
+.pdf-template .employee-section,
+.pdf-template .dependents-section {
+  margin-bottom: 25px;
+}
+
+.pdf-template .section-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 15px;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-left: 4px solid #3498db;
+  border-radius: 0 4px 4px 0;
+}
+
+/* Grid del empleado */
+.pdf-template .employee-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.pdf-template .field-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.pdf-template .field-label {
+  font-size: 10px;
+  font-weight: bold;
+  color: #666;
+  margin-bottom: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pdf-template .field-value {
+  font-size: 12px;
+  color: #333;
+  padding: 8px 10px;
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+}
+
+/* Tabla de dependientes */
+.pdf-template .dependents-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 10px;
+}
+
+.pdf-template .dependents-table th {
+  background: #3498db;
+  color: white;
+  padding: 10px 8px;
+  font-size: 10px;
+  font-weight: bold;
+  text-align: left;
+  border: 1px solid #2980b9;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pdf-template .dependents-table td {
+  padding: 8px;
+  font-size: 10px;
+  border: 1px solid #e0e0e0;
+  vertical-align: top;
+  line-height: 1.3;
+}
+
+.pdf-template .dependents-table tr:nth-child(even) {
+  background: #f8f9fa;
+}
+
+.pdf-template .dependents-table tr:nth-child(odd) {
+  background: #fff;
+}
+
+.pdf-template .dependents-table tr:hover {
+  background: #e3f2fd;
+}
+
+/* Sección de firma */
+.pdf-template .signature-section {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 2px solid #e0e0e0;
+}
+
+.pdf-template .signature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.pdf-template .signature-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.pdf-template .signature-line {
+  border-bottom: 1px solid #333;
+  height: 30px;
+  margin-bottom: 5px;
+  position: relative;
+}
+
+.pdf-template .signature-line::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #333;
+}
+
+.pdf-template .signature-label {
+  font-size: 10px;
+  color: #666;
+  text-align: center;
+  font-style: italic;
+}
+
+/* Pie de página */
+.pdf-template .footer {
+  position: absolute;
+  bottom: 20px;
+  left: 40px;
+  right: 40px;
+  text-align: center;
+  font-size: 9px;
+  color: #666;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 10px;
+}
+
+/* Utilidades */
+.pdf-template .text-center { text-align: center; }
+.pdf-template .text-right { text-align: right; }
+.pdf-template .font-bold { font-weight: bold; }
+.pdf-template .text-sm { font-size: 10px; }
+.pdf-template .text-xs { font-size: 9px; }
+.pdf-template .mb-2 { margin-bottom: 8px; }
+.pdf-template .mt-2 { margin-top: 8px; }
+
+/* Responsive para impresión */
+@media print {
+  .pdf-template {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 20px;
+    box-shadow: none;
+  }
+  
+  .pdf-template .dependents-table tr:hover {
+    background: inherit;
+  }
+}
+
+/* Estilos para vista previa en pantalla */
+.pdf-template.preview {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin: 20px auto;
+}
+
+/* Estilos para generación de PDF */
+.pdf-template.pdf-generation {
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+  visibility: hidden;
+}
+
+/* Animaciones suaves */
+.pdf-template .field-value,
+.pdf-template .dependents-table td {
+  transition: background-color 0.2s ease;
+}
+
+/* Mejoras de accesibilidad */
+.pdf-template .field-label {
+  cursor: default;
+}
+
+.pdf-template .dependents-table th {
+  cursor: default;
+}
+
+/* Estilos para datos vacíos */
+.pdf-template .field-value:empty::after {
+  content: '—';
+  color: #999;
+  font-style: italic;
+}
+
+/* Estilos para estados */
+.pdf-template .status-active {
+  color: #27ae60;
+  font-weight: bold;
+}
+
+.pdf-template .status-inactive {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+/* Estilos para género */
+.pdf-template .gender-male {
+  color: #3498db;
+}
+
+.pdf-template .gender-female {
+  color: #e91e63;
+}
+
+/* Estilos para edades */
+.pdf-template .age-child {
+  color: #f39c12;
+  font-weight: bold;
+}
+
+.pdf-template .age-adult {
+  color: #2c3e50;
+}
+
+/* Estilos para parentescos */
+.pdf-template .relationship-spouse {
+  background: #e8f5e8;
+  font-weight: bold;
+}
+
+.pdf-template .relationship-child {
+  background: #fff3cd;
+}
+
+.pdf-template .relationship-parent {
+  background: #d1ecf1;
+}
+
+/* Estilos para el logo de la compañía */
+.pdf-template .logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+/* Estilos para el título principal */
+.pdf-template .section-title {
+  position: relative;
+}
+
+.pdf-template .section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #3498db;
+  border-radius: 2px;
+}
+
+/* Estilos para la tabla responsive */
+@media (max-width: 900px) {
+  .pdf-template {
+    width: 100%;
+    padding: 20px;
+  }
+  
+  .pdf-template .employee-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .pdf-template .signature-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .pdf-template .dependents-table {
+    font-size: 9px;
+  }
+  
+  .pdf-template .dependents-table th,
+  .pdf-template .dependents-table td {
+    padding: 6px 4px;
+  }
+}

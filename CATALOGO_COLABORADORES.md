@@ -172,3 +172,4 @@ https://sgmm.portalapps.mx/privacy-policy
 http://localhost:3000/api/employees/search?q=Juan
 ```
 
+

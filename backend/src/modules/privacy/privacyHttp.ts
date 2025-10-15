@@ -167,3 +167,4 @@ export async function privacyRoutes(app: FastifyInstance) {
   app.log.info('Privacy routes registered successfully');
 }
 
+

@@ -145,3 +145,4 @@ curl -s https://sgmm.portalapps.mx/api/auth/saml/metadata
 **Contacto:** Equipo de Desarrollo SGMM  
 **Prioridad:** CRÍTICA - Bloquea acceso de usuario  
 **Tiempo estimado de resolución:** 30-60 minutos
+

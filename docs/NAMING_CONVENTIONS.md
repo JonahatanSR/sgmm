@@ -316,3 +316,4 @@ const employee = await prisma.employees.findFirst({
 - **Dependent ID**: Siempre usar ID compuesto `{employee_number}-{sequence}`
 - **Soft Delete**: Siempre usar `deleted_at` en lugar de eliminación física
 - **Audit Trail**: Siempre registrar acciones en `audit_trails`
+

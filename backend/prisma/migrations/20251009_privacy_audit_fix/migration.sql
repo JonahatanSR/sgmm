@@ -84,3 +84,4 @@ COMMENT ON COLUMN "dependents"."dependent_id" IS 'ID único del dependiente (for
 COMMENT ON COLUMN "dependents"."dependent_seq" IS 'Secuencia del dependiente dentro del empleado';
 COMMENT ON COLUMN "dependents"."deleted_at" IS 'Fecha de eliminación lógica (soft delete)';
 
+

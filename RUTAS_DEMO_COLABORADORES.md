@@ -119,3 +119,4 @@ curl -X POST "https://sgmm.portalapps.mx/api/employees" \
 Ahora tienes acceso completo a todas las rutas demo, incluyendo las de colaboradores que faltaban. Puedes usar cualquiera de los IDs válidos para probar las funcionalidades.
 
 **¿Necesitas que cree un empleado específico con el ID que mencionaste?** 🤔
+

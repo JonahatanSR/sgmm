@@ -34,6 +34,7 @@ RUN npm ci --omit=dev --ignore-scripts
 # Copy built application and Prisma client from builder
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/prisma ./prisma
 
 # Expose port
 EXPOSE 3000

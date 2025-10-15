@@ -200,3 +200,4 @@ Sistema de Gestión de Gastos Médicos Mayores (SGMM) - Documentación completa 
 ---
 
 *Esta documentación es la fuente de verdad para el desarrollo del sistema SGMM. Consultar siempre antes de implementar funcionalidades.*
+

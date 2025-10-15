@@ -165,3 +165,4 @@ Si necesitas ayuda adicional, todos los endpoints están funcionando correctamen
 - ✅ Login: https://sgmm.portalapps.mx/api/auth/saml/login
 - ✅ Callback: https://sgmm.portalapps.mx/api/auth/saml/callback
 
+

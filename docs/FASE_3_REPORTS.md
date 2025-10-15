@@ -311,3 +311,4 @@ curl -X GET http://localhost:3000/reports \
 - ⏳ Errores TypeScript en reportes: < 5
 - ⏳ Cobertura de tests: > 80%
 - ⏳ Documentación actualizada: 100%
+

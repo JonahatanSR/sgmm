@@ -161,3 +161,4 @@ https://sgmm.portalapps.mx/dependents/new/{user-id}
 - **Base de datos** → Esquema optimizado
 
 **¡El sistema ahora funciona como una aplicación completa con datos dinámicos conectados a Google Workspace via SAML!** 🎯
+

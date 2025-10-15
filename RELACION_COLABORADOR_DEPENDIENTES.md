@@ -186,3 +186,4 @@ WHERE rt.name = 'Hijo' AND d.status = 'ACTIVE';
 
 **El sistema permite gestionar eficientemente la relación entre colaboradores y sus dependientes con total trazabilidad y cumplimiento legal.**
 
+

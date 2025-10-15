@@ -146,3 +146,4 @@ SAML_CERT=[certificado de Google]
 **El sistema está listo para recibir el intento de login. El bucle de autenticación ha sido eliminado y ahora el callback SAML maneja correctamente las respuestas de Google.**
 
 **Próximo paso:** Probar el login con `jonahatan.angeles@siegfried.com.mx`
+
