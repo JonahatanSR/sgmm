@@ -3,6 +3,7 @@ import type { SignOptions } from 'jsonwebtoken';
 import { env } from '../../../config/environment';
 import { getPrismaClient } from '../../../config/database';
 import { PrismaEmployeeRepository } from '../../employees/adapters/prismaEmployeeRepository';
+import { employeeMappingService } from '../../employees/services/employeeMappingService';
 import { samlProcessor, type SamlUserData } from './samlProcessor';
 
 /**
@@ -183,17 +184,54 @@ export class SamlAuthService {
    * Crea un nuevo empleado
    */
   private async createNewEmployee(userData: SamlUserData) {
-    // Usar número de empleado real si está disponible, sino generar uno único
-    const employeeNumber = userData.employeeNumber || this.generateEmployeeNumber(userData.domain);
+    // 1. Buscar en tabla de mapeo primero
+    const mapping = await employeeMappingService.findByEmail(userData.email);
     
-    console.log('👤 [SAML AUTH] Número de empleado:', employeeNumber);
+    let employeeNumber: string;
+    let fullName = userData.fullName;
+    let department: string | undefined;
+    let position: string | undefined;
+    
+    if (mapping) {
+      // Usar datos de la tabla de mapeo
+      employeeNumber = mapping.employee_number;
+      fullName = mapping.full_name || userData.fullName;
+      department = mapping.department;
+      position = mapping.position;
+      console.log('👤 [SAML AUTH] Usando mapeo de empleado:', {
+        email: userData.email,
+        employeeNumber,
+        fullName,
+        department,
+        position
+      });
+    } else {
+      // Fallback: usar número de empleado real si está disponible, sino extraer del email, sino generar uno único
+      employeeNumber = userData.employeeNumber || '';
+      
+      if (!employeeNumber) {
+        // Intentar extraer número de empleado del email (parte antes del @)
+        const emailPrefix = userData.email.split('@')[0];
+        if (emailPrefix && /^\d+$/.test(emailPrefix)) {
+          // Si la parte antes del @ es solo números, usarla como número de empleado
+          employeeNumber = emailPrefix;
+        } else {
+          // Si no, generar uno único
+          employeeNumber = this.generateEmployeeNumber(userData.domain);
+        }
+      }
+      
+      console.log('👤 [SAML AUTH] Número de empleado (fallback):', employeeNumber);
+    }
     
     // Crear empleado con datos básicos
     return await this.employeeRepository.create({
       email: userData.email,
-      full_name: userData.fullName,
+      full_name: fullName,
       employee_number: employeeNumber,
-      company_id: await this.getOrCreateCompany(userData.domain)
+      company_id: await this.getOrCreateCompany(userData.domain),
+      department,
+      position
     });
   }
 

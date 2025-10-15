@@ -10,7 +10,11 @@ export interface Employee {
   gender?: 'M' | 'F' | null;
   hire_date: Date;
   company_id: string;
+  department?: string | null;
+  position?: string | null;
+  org_unit_path?: string | null;
   policy_number?: string | null;
+  status: 'ACTIVE' | 'INACTIVE';
   created_at: Date;
   updated_at: Date;
 }

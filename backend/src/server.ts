@@ -6,6 +6,7 @@ import { env } from './config/environment';
 import { getPrismaClient } from './config/database';
 import { registerSession } from './middleware/session';
 import { employeeRoutes } from './modules/employees/http';
+import { employeeMappingRoutes } from './modules/employees/http/employeeMappingHttp';
 import { dependentRoutes } from './modules/dependents/http';
 import { collaboratorSummaryRoutes } from './modules/collaboratorSummary/http';
 import { relationshipTypeRoutes } from './modules/relationshipTypes/http';
@@ -92,6 +93,7 @@ fastify.get('/', async () => {
 // Register routes
 fastify.register(authRoutes);
 fastify.register(employeeRoutes);
+fastify.register(employeeMappingRoutes);
 fastify.register(dependentRoutes);
 fastify.register(collaboratorSummaryRoutes);
 fastify.register(relationshipTypeRoutes);
