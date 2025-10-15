@@ -20,24 +20,66 @@ export async function dependentRoutes(app: FastifyInstance) {
 
   const listActiveHandler = async (req: any) => {
     const { employeeId } = req.params as any;
-    const active = await service.listActive(employeeId);
+    
+    // Buscar el empleado primero por ID interno, luego por employee_number
+    let employee = await prisma.employee.findUnique({ 
+      where: { id: employeeId }, 
+      select: { id: true, employee_number: true } 
+    });
+    
+    if (!employee) {
+      // Si no se encuentra por ID, buscar por employee_number
+      employee = await prisma.employee.findUnique({ 
+        where: { employee_number: employeeId }, 
+        select: { id: true, employee_number: true } 
+      });
+    }
+    
+    if (!employee) throw new Error('Employee not found');
+    const active = await service.listActive(employee.id);
     return active;
   };
 
   const listInactiveHandler = async (req: any) => {
     const { employeeId } = req.params as any;
-    const inactive = await service.listInactive(employeeId);
+    
+    // Buscar el empleado primero por ID interno, luego por employee_number
+    let employee = await prisma.employee.findUnique({ 
+      where: { id: employeeId }, 
+      select: { id: true, employee_number: true } 
+    });
+    
+    if (!employee) {
+      // Si no se encuentra por ID, buscar por employee_number
+      employee = await prisma.employee.findUnique({ 
+        where: { employee_number: employeeId }, 
+        select: { id: true, employee_number: true } 
+      });
+    }
+    
+    if (!employee) throw new Error('Employee not found');
+    const inactive = await service.listInactive(employee.id);
     return inactive;
   };
 
   const createHandler = async (req: any) => {
     const { employeeId } = req.params as any;
     const body = req.body as any;
-    // Buscar el ID real del empleado en la base de datos
-    const employee = await prisma.employee.findUnique({ 
-      where: { employee_number: employeeId }, 
+    
+    // Buscar el empleado primero por ID interno, luego por employee_number
+    let employee = await prisma.employee.findUnique({ 
+      where: { id: employeeId }, 
       select: { id: true, employee_number: true } 
     });
+    
+    if (!employee) {
+      // Si no se encuentra por ID, buscar por employee_number
+      employee = await prisma.employee.findUnique({ 
+        where: { employee_number: employeeId }, 
+        select: { id: true, employee_number: true } 
+      });
+    }
+    
     if (!employee) throw new Error('Employee not found');
     console.log('🔍 [DEBUG] HTTP createHandler - employeeId:', employeeId, 'employee.id:', employee.id, 'employee.employee_number:', employee.employee_number);
     return service.create({ ...body, employee_id: employee.id }, employee.employee_number);
