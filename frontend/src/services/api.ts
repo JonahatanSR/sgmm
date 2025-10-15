@@ -1,7 +1,14 @@
 export async function apiGet<T>(path: string): Promise<T> {
+  console.log('🌐 [API DEBUG] Making GET request to:', path);
   const res = await fetch(path);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+  console.log('🌐 [API DEBUG] Response status:', res.status, 'for path:', path);
+  if (!res.ok) {
+    console.error('❌ [API DEBUG] Request failed:', res.status, 'for path:', path);
+    throw new Error(`HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  console.log('✅ [API DEBUG] Request successful for path:', path, 'data:', data);
+  return data;
 }
 
 export async function apiDelete<T = unknown>(path: string): Promise<T> {

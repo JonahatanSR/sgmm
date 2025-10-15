@@ -24,24 +24,32 @@ export default function EditCollaborator() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
   
-  console.log('EditCollaborator - ID from params:', id);
+  console.log('🔍 [DEBUG] EditCollaborator component mounted');
+  console.log('🔍 [DEBUG] ID from params:', id);
+  console.log('🔍 [DEBUG] URL:', window.location.href);
   
   // Obtener datos del colaborador usando el endpoint de summary
   const { data: summaryData, isLoading: summaryLoading, error: summaryError } = useQuery<SummaryData>({
     queryKey: ['collaborator', id],
-    queryFn: () => apiGet<SummaryData>(`/api/collaborator/${id}/summary`),
+    queryFn: () => {
+      console.log('🔍 [DEBUG] Making API call to:', `/api/collaborator/${id}/summary`);
+      return apiGet<SummaryData>(`/api/collaborator/${id}/summary`);
+    },
     enabled: !!id, // Solo ejecutar si hay un ID
+    retry: 1
   })
   
-  console.log('EditCollaborator - Summary data:', summaryData);
-  console.log('EditCollaborator - Summary error:', summaryError);
+  console.log('🔍 [DEBUG] Summary data:', summaryData);
+  console.log('🔍 [DEBUG] Summary loading:', summaryLoading);
+  console.log('🔍 [DEBUG] Summary error:', summaryError);
 
   const [form, setForm] = useState<Employee>({ id })
   
   useEffect(() => {
-    if (summaryData?.employee) {
+    console.log('🔍 [DEBUG] useEffect triggered, summaryData:', summaryData);
+    if (summaryData && 'employee' in summaryData && summaryData.employee) {
       const emp = summaryData.employee;
-      console.log('Setting form with employee data:', emp);
+      console.log('✅ [DEBUG] Setting form with employee data:', emp);
       setForm({
         id: emp.id,
         first_name: emp.first_name,
@@ -50,6 +58,9 @@ export default function EditCollaborator() {
         gender: emp.gender,
         birth_date: emp.birth_date,
       })
+      console.log('✅ [DEBUG] Form state updated');
+    } else {
+      console.log('❌ [DEBUG] No employee data available in summaryData');
     }
   }, [summaryData])
 
@@ -66,7 +77,17 @@ export default function EditCollaborator() {
     },
   })
 
-  if (summaryLoading) return <div className="p-6">Cargando datos del colaborador…</div>
+  console.log('🔍 [DEBUG] Current form state:', form);
+  
+  if (summaryLoading) {
+    console.log('🔍 [DEBUG] Showing loading state');
+    return <div className="p-6">Cargando datos del colaborador…</div>
+  }
+  
+  if (summaryError) {
+    console.log('❌ [DEBUG] Showing error state:', summaryError);
+    return <div className="p-6">Error cargando datos del colaborador para edición: {String(summaryError)}</div>
+  }
 
   const inputCls = 'w-full rounded-md border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]'
   const labelCls = 'text-xs font-medium text-gray-600 mb-1 block'
