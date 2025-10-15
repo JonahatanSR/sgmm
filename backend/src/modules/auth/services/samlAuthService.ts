@@ -91,7 +91,7 @@ export class SamlAuthService {
       return {
         success: true,
         user: {
-          id: employee.employee_number, // Usar employee_number como ID estándar
+          id: employee.id, // Usar ID interno de Prisma para compatibilidad con endpoints
           email: employee.email,
           full_name: employee.full_name,
           company_id: employee.company_id,
