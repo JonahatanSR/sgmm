@@ -1,0 +1,31 @@
+FROM node:20-slim
+
+WORKDIR /app
+
+# Instalar dependencias del sistema (igual que producción)
+RUN apt-get update && apt-get install -y \
+    openssl \
+    ca-certificates \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalar dependencias (mejor cache layer)
+COPY package*.json ./
+RUN npm ci
+
+# Copiar configuración
+COPY tsconfig.json ./
+COPY prisma ./prisma/
+
+# Generar Prisma client
+RUN npx prisma generate
+
+# Exponer puerto
+EXPOSE 3000
+
+# Health check (igual que producción)
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/health || exit 1
+
+# Desarrollo con hot reload
+CMD ["npm", "run", "dev"]

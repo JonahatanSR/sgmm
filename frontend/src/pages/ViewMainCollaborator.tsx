@@ -82,10 +82,16 @@ export default function ViewMainCollaborator() {
     if (!data || !relTypes) return;
 
     try {
-      // Preparar datos para el PDF usando datos existentes
+      console.log('🔄 Generando PDF con datos reales...');
+      console.log('📊 Datos del empleado:', data.employee);
+      console.log('👥 Dependientes activos:', data.dependents.active);
+      console.log('👥 Dependientes inactivos:', data.dependents.inactive);
+
+      // Preparar datos para el PDF usando datos reales
       const pdfData = {
         employee: {
           id: data.employee.id,
+          employee_number: data.employee.employee_number,
           google_id: undefined,
           email: data.employee.email,
           full_name: data.employee.full_name,

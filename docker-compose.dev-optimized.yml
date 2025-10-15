@@ -1,11 +1,11 @@
 version: '3.8'
 
 services:
-  # Base de datos
+  # Base de datos (idéntica a producción)
   postgres:
     image: postgres:15
-    container_name: sgmm_postgres
-    restart: always
+    container_name: sgmm_postgres_dev
+    restart: unless-stopped
     environment:
       POSTGRES_DB: sgmm_db
       POSTGRES_USER: sgmm_user
@@ -13,40 +13,40 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_dev_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U sgmm_user -d sgmm_db"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # Cache
+  # Redis (idéntico a producción)
   redis:
     image: redis:7-alpine
-    container_name: sgmm_redis
-    restart: always
+    container_name: sgmm_redis_dev
+    restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data
+      - redis_dev_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 3
 
-  # Backend API
+  # Backend con hot reload (optimizado)
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
-    container_name: sgmm_backend
-    restart: always
+      dockerfile: Dockerfile.dev-optimized
+    container_name: sgmm_backend_dev
+    restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=production
-      - DATABASE_URL=postgresql://sgmm_user:sgmm_password_2024@postgres:5432/sgmm_db?schema=public
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://sgmm_user:sgmm_password_2024@postgres:5432/sgmm_db
       - REDIS_URL=redis://redis:6379
       - PORT=3000
       - HOST=0.0.0.0
@@ -59,6 +59,15 @@ services:
       - SAML_ISSUER=https://sgmm.portalapps.mx/api/auth/saml/metadata
       - SAML_CALLBACK_URL=https://sgmm.portalapps.mx/api/auth/saml/callback
       - SAML_CERT=-----BEGIN CERTIFICATE-----\nMIIDdDCCAlygAwIBAgIGAYEG3G7gMA0GCSqGSIb3DQEBCwUAMHsxFDASBgNVBAoTC0dvb2dsZSBJ\nbmMuMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MQ8wDQYDVQQDEwZHb29nbGUxGDAWBgNVBAsTD0dv\nb2dsZSBGb3IgV29yazELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWEwHhcNMjIwNTI3\nMTg1MTU3WhcNMjcwNTI2MTg1MTU3WjB7MRQwEgYDVQQKEwtHb29nbGUgSW5jLjEWMBQGA1UEBxMN\nTW91bnRhaW4gVmlldzEPMA0GA1UEAxMGR29vZ2xlMRgwFgYDVQQLEw9Hb29nbGUgRm9yIFdvcmsx\nCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A\nMIIBCgKCAQEAjoRtWy1F1tDVBvr29ZnvCgFyqp3E2SaFYVUMg7iwaEI/cDs2P/OlxdnMHAOJtuCm\n04UBCfcE7cNuLaS40I/9g3/9ywzz2JTETAVPzW5HDh5q4vfw5yIKF8JA378o+9R/Q/Rg8wi1NCn5\nZYLJggATaOHDSAOxdKKXJRft8xa8gn54yBQZ/bCl9H2oM+gJGbq61brKSro5tuNkvxRtdHjoPJ18\nLz5rV+8Gr0gryX6MyPsctcotRCVNht+4rKtG8iSCzA9TwllpCyNBrXaXg8VKMhBTmi1RK7bC7ukY\n8xX5Uh8+9UrBPS8t399bvwTh5si3FayvERZu7QB0kAuE+XiuzQIDAQABMA0GCSqGSIb3DQEBCwUA\nA4IBAQA/mOmqlU+hdeg3VEG6wqVYLZXzSYywMLPkeH3h/7iXlDFGAJVzfzJZqe4WqDq/g1dGnGAd\nmyE508YTV/ZZGWMwjUSkBRBZZk/d+mI6JeziNUsepFAd1cTAlmgLi0X15KWw0U9wT4YjQjxI8Un4\ntQyn4IK5piBydD23S7uUzGmehykzG0iaP2JIF1R394s2a1mUAyl90QNcZXfoFFsuk/CBtFZqq6hd\nY2IMBexqjnHlBKqpc3HOxQikydtfujjw7tMNJWpm7wktW56RTNn9UlyVyIfMX5NB6RbuItTKExZn\nvP5cOFiGGvvZpDPf826WhUJGvcMs0ThCG5yEFnOQWEOx\n-----END CERTIFICATE-----
+    volumes:
+      # Hot reload: montar código fuente
+      - ./backend/src:/app/src:ro
+      - ./backend/prisma:/app/prisma:ro
+      - ./backend/package.json:/app/package.json:ro
+      - ./backend/tsconfig.json:/app/tsconfig.json:ro
+      # Logs y uploads
+      - logs_dev_data:/app/logs
+      - uploads_dev_data:/app/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -70,48 +79,41 @@ services:
       timeout: 10s
       retries: 3
 
-  # Frontend (Nginx Proxy con HTTPS)
+  # Frontend con hot reload (optimizado)
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
-    container_name: sgmm_frontend
-    restart: always
+      dockerfile: Dockerfile.dev-optimized
+    container_name: sgmm_frontend_dev
+    restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:3000
     volumes:
-      - ./data/certbot/conf:/etc/letsencrypt
-      - ./data/certbot/www:/var/www/certbot
-      # VOLÚMENES PARA DESARROLLO - HOT RELOAD
-      - ./frontend/src:/app/src
-      - ./frontend/public:/app/public
-      - ./frontend/index.html:/app/index.html
-      - ./frontend/vite.config.ts:/app/vite.config.ts
-      - ./frontend/package.json:/app/package.json
-      - ./frontend/tsconfig.json:/app/tsconfig.json
-      - ./frontend/tsconfig.node.json:/app/tsconfig.node.json
+      # Hot reload: montar código fuente
+      - ./frontend/src:/app/src:ro
+      - ./frontend/public:/app/public:ro
+      - ./frontend/package.json:/app/package.json:ro
+      - ./frontend/vite.config.ts:/app/vite.config.ts:ro
+      - ./frontend/tailwind.config.js:/app/tailwind.config.js:ro
+      - ./frontend/postcss.config.js:/app/postcss.config.js:ro
+      - ./frontend/tsconfig.json:/app/tsconfig.json:ro
     depends_on:
       - backend
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
       interval: 30s
       timeout: 10s
       retries: 3
 
-  # Certbot para certificados SSL
-  certbot:
-    image: certbot/certbot
-    container_name: sgmm_certbot
-    volumes:
-      - ./data/certbot/conf:/etc/letsencrypt
-      - ./data/certbot/www:/var/www/certbot
-    command: certonly --webroot --webroot-path=/var/www/certbot --email admin@sgmm.portalapps.mx --agree-tos --no-eff-email --force-renewal -d sgmm.portalapps.mx
-
 volumes:
-  postgres_data:
-  redis_data:
+  postgres_dev_data:
+  redis_dev_data:
+  logs_dev_data:
+  uploads_dev_data:
 
 networks:
   default:
-    name: sgmm_network
+    name: sgmm_network_dev

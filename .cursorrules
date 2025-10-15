@@ -26,6 +26,26 @@ Implementar un sistema SGMM funcional, escalable y mantenible siguiendo arquitec
 - **VALIDAR CON GATES**: Ejecutar validaciones antes de aceptar cambios
 - **ANÁLISIS FORENSE**: Investigar causa raíz antes de implementar soluciones
 
+### 2.1. VALIDACIÓN TRIPLE OBLIGATORIA
+**ANTES DE CADA EJECUCIÓN**:
+- [ ] **CONSULTAR FUENTES DE VERDAD**: Revisar documentación en `/docs` antes de implementar
+- [ ] **VALIDAR ARQUITECTURA**: Verificar que el cambio mantiene clean architecture
+- [ ] **REVISAR DEPENDENCIAS**: Identificar qué módulos se ven afectados
+- [ ] **CONFIRMAR CONVENCIONES**: Verificar nomenclatura según `NAMING_CONVENTIONS.md`
+
+**DURANTE LA EJECUCIÓN**:
+- [ ] **MONITOREAR LOGS**: Verificar que no hay errores en tiempo real
+- [ ] **VALIDAR FUNCIONALIDAD**: Probar que la funcionalidad funciona como esperado
+- [ ] **VERIFICAR RENDIMIENTO**: Asegurar que no se degrada el rendimiento
+- [ ] **CONFIRMAR INTEGRACIÓN**: Verificar que se integra correctamente con otros módulos
+
+**DESPUÉS DE CADA EJECUCIÓN**:
+- [ ] **PRUEBA FUNCIONAL**: Ejecutar pruebas para confirmar que funciona
+- [ ] **VALIDACIÓN DE DATOS**: Verificar que los datos se procesan correctamente
+- [ ] **REVISIÓN DE CÓDIGO**: Confirmar que el código sigue las convenciones
+- [ ] **DOCUMENTACIÓN**: Actualizar documentación si es necesario
+- [ ] **COMMIT SIGNIFICATIVO**: Hacer commit con mensaje descriptivo
+
 ### 3. REVISIÓN OBLIGATORIA DE FUENTES DE VERDAD (ANTES DE CADA BLOQUE)
 
 #### **CHECKLIST OBLIGATORIO AL INICIO DE CADA BLOQUE**:

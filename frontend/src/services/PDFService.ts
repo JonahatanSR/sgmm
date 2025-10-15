@@ -18,15 +18,25 @@ export class PDFService {
     precision: 2
   };
 
-  // Configuración de html2canvas
+  // Configuración de html2canvas optimizada
   private readonly CANVAS_CONFIG = {
-    scale: 2, // Mayor resolución
+    scale: 3, // Mayor resolución para mejor calidad
     useCORS: true,
     allowTaint: true,
     backgroundColor: '#ffffff',
     logging: false,
     width: 816, // 8.5" * 96 DPI
-    height: 1056 // 11" * 96 DPI
+    height: 1056, // 11" * 96 DPI
+    scrollX: 0,
+    scrollY: 0,
+    windowWidth: 816,
+    windowHeight: 1056,
+    ignoreElements: (element: Element) => {
+      // Ignorar elementos que no deben aparecer en el PDF
+      return element.classList.contains('no-print') || 
+             (element as HTMLElement).style.display === 'none' ||
+             (element as HTMLElement).style.visibility === 'hidden';
+    }
   };
 
   private constructor() {}
@@ -39,14 +49,16 @@ export class PDFService {
   }
 
   /**
-   * Genera un PDF a partir de un elemento HTML
+   * Genera un PDF a partir de un elemento HTML (OPTIMIZADO)
    * @param elementId ID del elemento HTML a convertir
    * @param filename Nombre del archivo PDF
    * @returns Promise<boolean> - true si se generó exitosamente
    */
   public async generatePDFFromHTML(elementId: string, filename: string): Promise<boolean> {
+    const startTime = performance.now();
+    
     try {
-      console.log('🔄 Iniciando generación de PDF...');
+      console.log('🔄 Iniciando generación de PDF optimizada...');
       
       // 1. Obtener el elemento HTML
       const element = document.getElementById(elementId);
@@ -54,33 +66,68 @@ export class PDFService {
         throw new Error(`Elemento con ID '${elementId}' no encontrado`);
       }
 
-      // 2. Convertir HTML a canvas
+      // 2. Preload de recursos para mejor rendimiento
+      console.log('📸 Pre-cargando recursos...');
+      await this.preloadResources(element);
+
+      // 3. Convertir HTML a canvas con configuración optimizada
       console.log('📸 Convirtiendo HTML a canvas...');
       const canvas = await html2canvas(element, this.CANVAS_CONFIG);
       
-      // 3. Crear PDF
+      // 4. Crear PDF con metadatos
       console.log('📄 Creando PDF...');
       const pdf = new jsPDF(this.PDF_CONFIG);
       
-      // 4. Calcular dimensiones
-      const imgWidth = this.PDF_CONFIG.format === 'letter' ? 216 : 210; // mm
+      // 5. Agregar metadatos al PDF
+      pdf.setProperties({
+        title: `Formulario SGMM - ${filename}`,
+        subject: 'Sistema de Gestión de Gastos Médicos Mayores',
+        author: 'Sistema SGMM',
+        creator: 'SGMM v1.0'
+      });
+      
+      // 6. Calcular dimensiones optimizadas
+      const imgWidth = 216; // mm (8.5")
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       
-      // 5. Agregar imagen al PDF
-      const imgData = canvas.toDataURL('image/png');
+      // 7. Agregar imagen al PDF con mejor calidad
+      const imgData = canvas.toDataURL('image/png', 1.0); // Máxima calidad
       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
       
-      // 6. Descargar PDF
+      // 8. Descargar PDF
       console.log('💾 Descargando PDF...');
       pdf.save(filename);
       
-      console.log('✅ PDF generado exitosamente:', filename);
+      const endTime = performance.now();
+      const generationTime = Math.round(endTime - startTime);
+      
+      console.log(`✅ PDF generado exitosamente en ${generationTime}ms:`, filename);
       return true;
       
     } catch (error) {
       console.error('❌ Error generando PDF:', error);
       return false;
     }
+  }
+
+  /**
+   * Pre-carga recursos para mejorar el rendimiento
+   * @param element Elemento HTML
+   */
+  private async preloadResources(element: HTMLElement): Promise<void> {
+    const images = element.querySelectorAll('img');
+    const promises = Array.from(images).map(img => {
+      return new Promise<void>((resolve) => {
+        if (img.complete) {
+          resolve();
+        } else {
+          img.onload = () => resolve();
+          img.onerror = () => resolve(); // Continuar aunque falle
+        }
+      });
+    });
+    
+    await Promise.all(promises);
   }
 
   /**

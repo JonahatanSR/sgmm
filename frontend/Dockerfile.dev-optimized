@@ -1,0 +1,23 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Instalar dependencias (mejor cache layer)
+COPY package*.json ./
+RUN npm ci
+
+# Copiar configuración
+COPY vite.config.ts ./
+COPY tailwind.config.js ./
+COPY postcss.config.js ./
+COPY tsconfig.json ./
+
+# Exponer puerto para Vite dev server
+EXPOSE 8080
+
+# Health check (igual que producción)
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "const http=require('http');const req=http.request({host:'localhost',port:8080,path:'/'},res=>{process.exit(res.statusCode===200?0:1)});req.on('error',()=>process.exit(1));req.end();"
+
+# Desarrollo con hot reload
+CMD ["npm", "run", "dev"]

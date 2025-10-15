@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import type { PDFCollaboratorData } from '../../types/pdf.types';
 import { 
   formatDate, 
@@ -9,6 +9,7 @@ import {
   formatEmployeeId,
   formatDependentId
 } from '../../utils/pdf.utils';
+import './PDFTemplate.css';
 
 interface PDFTemplateProps {
   data: PDFCollaboratorData;
@@ -16,86 +17,40 @@ interface PDFTemplateProps {
 }
 
 export const PDFTemplate: React.FC<PDFTemplateProps> = ({ data, className = '' }) => {
-  const templateRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (templateRef.current && data) {
-      populateTemplate(data);
-    }
-  }, [data]);
-
-  const populateTemplate = (data: PDFCollaboratorData) => {
-    if (!templateRef.current) return;
-
-    // Datos del empleado
-    const employee = data.employee;
-    const company = data.company;
-    const dependents = data.dependents || [];
-    const relationshipTypes = data.relationshipTypes || [];
-
-    // Actualizar datos del empleado
-    updateElement('employee-number', formatEmployeeId(employee.id));
-    updateElement('employee-full-name', employee.full_name);
-    updateElement('employee-email', employee.email);
-    updateElement('employee-birth-date', formatDate(employee.birth_date || ''));
-    updateElement('employee-age', `${calculateAge(employee.birth_date || '')} años`);
-    updateElement('employee-gender', formatGender(employee.gender || 'M'));
-    updateElement('employee-hire-date', formatDate(employee.hire_date));
-    updateElement('employee-department', employee.department || '');
-    updateElement('employee-position', employee.position || '');
-    updateElement('employee-policy-number', employee.policy_number || '');
-
-    // Actualizar datos de la compañía
-    updateElement('company-name', company.name);
-    updateElement('company-code', `Código: ${company.code}`);
-
-    // Actualizar fecha de generación
-    const now = new Date();
-    const dateStr = formatDate(now.toISOString());
-    updateElement('generation-date', dateStr);
-    updateElement('footer-date', dateStr);
-
-    // Actualizar dependientes
-    updateElement('dependents-total', dependents.length.toString());
-    updateDependentsTable(dependents, relationshipTypes);
-  };
-
-  const updateElement = (id: string, value: string) => {
-    const element = templateRef.current?.querySelector(`#${id}`);
-    if (element) {
-      element.textContent = value;
-    }
-  };
-
-  const updateDependentsTable = (dependents: any[], relationshipTypes: any[]) => {
-    const tbody = templateRef.current?.querySelector('#dependents-tbody');
-    if (!tbody) return;
-
-    tbody.innerHTML = '';
-
-    dependents.forEach(dependent => {
-      const row = document.createElement('tr');
-      
-      const relationshipType = relationshipTypes.find(rt => rt.id === dependent.relationship_type_id);
-      const relationshipName = relationshipType?.name || 'Desconocido';
-      
-      row.innerHTML = `
-        <td>${formatDependentId(dependent.dependent_id || dependent.id)}</td>
-        <td>${formatFullName(dependent.first_name, dependent.paternal_last_name, dependent.maternal_last_name)}</td>
-        <td>${formatDate(dependent.birth_date)}</td>
-        <td>${calculateAge(dependent.birth_date)} años</td>
-        <td>${formatGender(dependent.gender)}</td>
-        <td>${relationshipName}</td>
-        <td>${formatStatus(dependent.status)}</td>
-      `;
-      tbody.appendChild(row);
-    });
-  };
 
   return (
-    <div className={`pdf-template ${className}`} ref={templateRef}>
+    <div 
+      className={`pdf-template ${className}`}
+      style={{
+        fontFamily: 'Arial, Helvetica, sans-serif',
+        fontSize: '11px',
+        lineHeight: '1.4',
+        color: '#2c3e50',
+        background: '#fff',
+        width: '816px',
+        minHeight: '1056px',
+        margin: '0 auto',
+        padding: '25px',
+        position: 'relative',
+        border: '1px solid #e0e0e0',
+        boxShadow: '0 0 10px rgba(0,0,0,0.1)'
+      }}
+    >
       {/* Encabezado */}
-      <div className="header">
+      <div 
+        className="header"
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          marginBottom: '20px',
+          padding: '18px',
+          background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+          border: '2px solid #3498db',
+          borderRadius: '6px',
+          boxShadow: '0 2px 8px rgba(52, 152, 219, 0.15)'
+        }}
+      >
         <div className="logo-section">
           <div className="logo">
             {data.company.logo_url ? (
@@ -120,8 +75,34 @@ export const PDFTemplate: React.FC<PDFTemplateProps> = ({ data, className = '' }
       </div>
 
       {/* Información del Colaborador */}
-      <div className="employee-section">
-        <h2 className="section-title">INFORMACIÓN DEL COLABORADOR</h2>
+      <div 
+        className="employee-section"
+        style={{
+          marginBottom: '25px',
+          padding: '20px',
+          background: '#ffffff',
+          border: '1px solid #e0e0e0',
+          borderRadius: '6px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+        }}
+      >
+        <h2 
+          className="section-title"
+          style={{
+            fontSize: '18px',
+            fontWeight: 'bold',
+            color: '#e74c3c',
+            marginBottom: '20px',
+            paddingBottom: '10px',
+            borderBottom: '3px solid #e74c3c',
+            textAlign: 'center',
+            background: '#f8f9fa',
+            padding: '10px',
+            borderRadius: '5px'
+          }}
+        >
+          🚀 INFORMACIÓN DEL COLABORADOR - HOT RELOAD FUNCIONANDO 🚀
+        </h2>
         
         <div className="employee-grid">
           <div className="field-group">
@@ -187,76 +168,407 @@ export const PDFTemplate: React.FC<PDFTemplateProps> = ({ data, className = '' }
         </div>
       </div>
 
-      {/* Información de Dependientes */}
+      {/* Información de Dependientes - DISEÑO PROFESIONAL */}
       <div className="dependents-section">
         <h2 className="section-title">DEPENDIENTES REGISTRADOS</h2>
         
-        <div className="mb-2">
-          <strong>Total de dependientes: <span id="dependents-total">{data.dependents.length}</span></strong>
+        <div style={{ 
+          background: '#ffffff', 
+          padding: '15px', 
+          border: '1px solid #bdc3c7', 
+          borderRadius: '4px',
+          marginBottom: '15px',
+          fontSize: '12px',
+          color: '#2c3e50'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <strong style={{ color: '#2c3e50' }}>
+                Total de dependientes registrados: <span style={{ color: '#3498db', fontSize: '14px' }}>{data.dependents.length}</span>
+              </strong>
+            </div>
+            <div style={{ fontSize: '10px', color: '#7f8c8d' }}>
+              Generado el: {formatDate(new Date().toISOString())}
+            </div>
+          </div>
         </div>
 
-        <table className="dependents-table" id="dependents-table">
-          <thead>
-            <tr>
-              <th>ID Dependiente</th>
-              <th>Nombre Completo</th>
-              <th>Fecha de Nacimiento</th>
-              <th>Edad</th>
-              <th>Género</th>
-              <th>Parentesco</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody id="dependents-tbody">
-            {data.dependents.map((dependent) => {
-              const relationshipType = data.relationshipTypes.find(rt => rt.id === dependent.relationship_type_id);
-              const relationshipName = relationshipType?.name || 'Desconocido';
-              
-              return (
-                <tr key={dependent.id}>
-                  <td>{formatDependentId(dependent.dependent_id || dependent.id)}</td>
-                  <td>{formatFullName(dependent.first_name, dependent.paternal_last_name, dependent.maternal_last_name)}</td>
-                  <td>{formatDate(dependent.birth_date)}</td>
-                  <td>{calculateAge(dependent.birth_date)} años</td>
-                  <td>{formatGender(dependent.gender)}</td>
-                  <td>{relationshipName}</td>
-                  <td>{formatStatus(dependent.status)}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        {data.dependents.length > 0 ? (
+          <table 
+            className="dependents-table" 
+            id="dependents-table"
+            style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+              marginTop: '15px',
+              fontSize: '10px',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+              borderRadius: '6px',
+              overflow: 'hidden'
+            }}
+          >
+            <thead>
+              <tr>
+                <th style={{
+                  background: 'linear-gradient(135deg, #2c3e50, #34495e)',
+                  color: 'white',
+                  padding: '12px 10px',
+                  textAlign: 'center',
+                  border: '1px solid #2c3e50',
+                  fontWeight: 'bold',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                }}>ID Dependiente</th>
+                <th style={{
+                  background: 'linear-gradient(135deg, #2c3e50, #34495e)',
+                  color: 'white',
+                  padding: '12px 10px',
+                  textAlign: 'center',
+                  border: '1px solid #2c3e50',
+                  fontWeight: 'bold',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                }}>Nombre Completo</th>
+                <th style={{
+                  background: 'linear-gradient(135deg, #2c3e50, #34495e)',
+                  color: 'white',
+                  padding: '12px 10px',
+                  textAlign: 'center',
+                  border: '1px solid #2c3e50',
+                  fontWeight: 'bold',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                }}>Fecha de Nacimiento</th>
+                <th style={{
+                  background: 'linear-gradient(135deg, #2c3e50, #34495e)',
+                  color: 'white',
+                  padding: '12px 10px',
+                  textAlign: 'center',
+                  border: '1px solid #2c3e50',
+                  fontWeight: 'bold',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                }}>Edad</th>
+                <th style={{
+                  background: 'linear-gradient(135deg, #2c3e50, #34495e)',
+                  color: 'white',
+                  padding: '12px 10px',
+                  textAlign: 'center',
+                  border: '1px solid #2c3e50',
+                  fontWeight: 'bold',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                }}>Género</th>
+                <th style={{
+                  background: 'linear-gradient(135deg, #2c3e50, #34495e)',
+                  color: 'white',
+                  padding: '12px 10px',
+                  textAlign: 'center',
+                  border: '1px solid #2c3e50',
+                  fontWeight: 'bold',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                }}>Parentesco</th>
+                <th style={{
+                  background: 'linear-gradient(135deg, #2c3e50, #34495e)',
+                  color: 'white',
+                  padding: '12px 10px',
+                  textAlign: 'center',
+                  border: '1px solid #2c3e50',
+                  fontWeight: 'bold',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                }}>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="dependents-tbody">
+              {data.dependents.map((dependent) => {
+                const relationshipType = data.relationshipTypes.find(rt => rt.id === dependent.relationship_type_id);
+                const relationshipName = relationshipType?.name || 'Desconocido';
+                
+                return (
+                  <tr 
+                    key={dependent.id}
+                    style={{
+                      background: '#ffffff',
+                      borderBottom: '1px solid #e0e0e0'
+                    }}
+                  >
+                    <td style={{ 
+                      fontWeight: 'bold', 
+                      color: '#2c3e50',
+                      padding: '12px 10px',
+                      border: '1px solid #bdc3c7',
+                      textAlign: 'center'
+                    }}>
+                      {formatDependentId(dependent.dependent_id || dependent.id)}
+                    </td>
+                    <td style={{ 
+                      textAlign: 'left', 
+                      paddingLeft: '15px',
+                      padding: '12px 10px',
+                      border: '1px solid #bdc3c7'
+                    }}>
+                      {formatFullName(dependent.first_name, dependent.paternal_last_name, dependent.maternal_last_name)}
+                    </td>
+                    <td style={{
+                      padding: '12px 10px',
+                      border: '1px solid #bdc3c7',
+                      textAlign: 'center'
+                    }}>{formatDate(dependent.birth_date)}</td>
+                    <td style={{ 
+                      fontWeight: 'bold', 
+                      color: '#3498db',
+                      padding: '12px 10px',
+                      border: '1px solid #bdc3c7',
+                      textAlign: 'center'
+                    }}>
+                      {calculateAge(dependent.birth_date)} años
+                    </td>
+                    <td style={{
+                      padding: '12px 10px',
+                      border: '1px solid #bdc3c7',
+                      textAlign: 'center'
+                    }}>{formatGender(dependent.gender)}</td>
+                    <td style={{ 
+                      fontWeight: '500',
+                      padding: '12px 10px',
+                      border: '1px solid #bdc3c7',
+                      textAlign: 'center'
+                    }}>{relationshipName}</td>
+                    <td style={{
+                      padding: '12px 10px',
+                      border: '1px solid #bdc3c7',
+                      textAlign: 'center'
+                    }}>
+                      <span style={{ 
+                        padding: '3px 8px', 
+                        borderRadius: '12px', 
+                        fontSize: '9px',
+                        fontWeight: 'bold',
+                        color: dependent.status === 'ACTIVE' ? '#27ae60' : '#e74c3c',
+                        background: dependent.status === 'ACTIVE' ? '#d5f4e6' : '#fadbd8'
+                      }}>
+                        {formatStatus(dependent.status)}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        ) : (
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '40px', 
+            background: '#f8f9fa', 
+            border: '2px dashed #bdc3c7',
+            borderRadius: '6px',
+            color: '#7f8c8d',
+            fontSize: '12px'
+          }}>
+            <strong>No hay dependientes registrados</strong>
+            <br />
+            <span style={{ fontSize: '10px' }}>El colaborador no tiene dependientes en el sistema</span>
+          </div>
+        )}
       </div>
 
-      {/* Sección de Firma */}
-      <div className="signature-section">
-        <h2 className="section-title">ACEPTACIÓN Y FIRMA</h2>
+      {/* Sección de Firma - DISEÑO PROFESIONAL */}
+      <div 
+        className="signature-section"
+        style={{
+          marginTop: '30px',
+          padding: '25px',
+          background: '#f8f9fa',
+          border: '2px solid #3498db',
+          borderRadius: '8px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        }}
+      >
+        <h2 
+          className="section-title"
+          style={{
+            fontSize: '16px',
+            fontWeight: 'bold',
+            color: '#2c3e50',
+            marginBottom: '20px',
+            paddingBottom: '10px',
+            borderBottom: '2px solid #3498db'
+          }}
+        >
+          ACEPTACIÓN Y FIRMA
+        </h2>
         
-        <p className="text-sm mb-2">
-          Por medio de la presente, confirmo que la información aquí contenida es veraz y completa, 
-          y autorizo el uso de estos datos para los fines del sistema de gestión de seguros médicos.
-        </p>
+        <div style={{ 
+          background: '#ffffff', 
+          padding: '15px', 
+          border: '1px solid #bdc3c7', 
+          borderRadius: '4px',
+          marginBottom: '20px',
+          fontSize: '11px',
+          lineHeight: '1.5',
+          color: '#2c3e50'
+        }}>
+          <p style={{ marginBottom: '10px', fontWeight: 'bold' }}>
+            DECLARACIÓN DE VERACIDAD:
+          </p>
+          <p style={{ marginBottom: '8px' }}>
+            Por medio de la presente, confirmo bajo protesta de decir verdad que la información 
+            aquí contenida es veraz, completa y actualizada.
+          </p>
+          <p style={{ marginBottom: '8px' }}>
+            Autorizo el uso de estos datos para los fines del sistema de gestión de seguros médicos 
+            y acepto las condiciones establecidas en el aviso de privacidad.
+          </p>
+          <p style={{ fontWeight: 'bold', color: '#e74c3c' }}>
+            La falsedad en la información proporcionada será motivo de responsabilidad legal.
+          </p>
+        </div>
 
-        <div className="signature-grid">
-          <div className="signature-field">
-            <div className="signature-line"></div>
-            <div className="signature-label">Firma del Colaborador</div>
+        <div 
+          className="signature-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '20px',
+            marginTop: '20px'
+          }}
+        >
+          <div 
+            className="signature-field"
+            style={{
+              textAlign: 'center',
+              padding: '15px',
+              background: '#ffffff',
+              border: '1px solid #bdc3c7',
+              borderRadius: '4px'
+            }}
+          >
+            <div 
+              className="signature-line"
+              style={{
+                height: '40px',
+                borderBottom: '2px solid #2c3e50',
+                marginBottom: '8px'
+              }}
+            ></div>
+            <div 
+              className="signature-label"
+              style={{
+                fontSize: '10px',
+                fontWeight: 'bold',
+                color: '#2c3e50'
+              }}
+            >
+              Firma del Colaborador
+            </div>
           </div>
-          <div className="signature-field">
-            <div className="signature-line"></div>
-            <div className="signature-label">Fecha</div>
+          <div 
+            className="signature-field"
+            style={{
+              textAlign: 'center',
+              padding: '15px',
+              background: '#ffffff',
+              border: '1px solid #bdc3c7',
+              borderRadius: '4px'
+            }}
+          >
+            <div 
+              className="signature-line"
+              style={{
+                height: '40px',
+                borderBottom: '2px solid #2c3e50',
+                marginBottom: '8px'
+              }}
+            ></div>
+            <div 
+              className="signature-label"
+              style={{
+                fontSize: '10px',
+                fontWeight: 'bold',
+                color: '#2c3e50'
+              }}
+            >
+              Fecha de Firma
+            </div>
           </div>
         </div>
 
-        <div className="signature-grid mt-2">
-          <div className="signature-field">
-            <div className="signature-line"></div>
-            <div className="signature-label">Nombre Completo</div>
+        <div 
+          className="signature-grid" 
+          style={{ 
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '20px',
+            marginTop: '20px'
+          }}
+        >
+          <div 
+            className="signature-field"
+            style={{
+              textAlign: 'center',
+              padding: '15px',
+              background: '#ffffff',
+              border: '1px solid #bdc3c7',
+              borderRadius: '4px'
+            }}
+          >
+            <div 
+              className="signature-line"
+              style={{
+                height: '40px',
+                borderBottom: '2px solid #2c3e50',
+                marginBottom: '8px'
+              }}
+            ></div>
+            <div 
+              className="signature-label"
+              style={{
+                fontSize: '10px',
+                fontWeight: 'bold',
+                color: '#2c3e50'
+              }}
+            >
+              Nombre Completo
+            </div>
           </div>
-          <div className="signature-field">
-            <div className="signature-line"></div>
-            <div className="signature-label">Número de Empleado</div>
+          <div 
+            className="signature-field"
+            style={{
+              textAlign: 'center',
+              padding: '15px',
+              background: '#ffffff',
+              border: '1px solid #bdc3c7',
+              borderRadius: '4px'
+            }}
+          >
+            <div 
+              className="signature-line"
+              style={{
+                height: '40px',
+                borderBottom: '2px solid #2c3e50',
+                marginBottom: '8px'
+              }}
+            ></div>
+            <div 
+              className="signature-label"
+              style={{
+                fontSize: '10px',
+                fontWeight: 'bold',
+                color: '#2c3e50'
+              }}
+            >
+              Número de Empleado
+            </div>
           </div>
+        </div>
+
+        <div style={{ 
+          marginTop: '25px', 
+          padding: '10px', 
+          background: '#e8f4f8', 
+          border: '1px solid #3498db',
+          borderRadius: '4px',
+          fontSize: '10px',
+          color: '#2c3e50',
+          textAlign: 'center'
+        }}>
+          <strong>IMPORTANTE:</strong> Este documento debe ser firmado y entregado al departamento de Recursos Humanos 
+          dentro de los 5 días hábiles siguientes a su generación.
         </div>
       </div>
 

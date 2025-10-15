@@ -2,21 +2,24 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install dependencies first (mejor caching)
+# Install curl for health checks
+RUN apk add --no-cache curl
+
+# Copy package files
 COPY package*.json ./
+
+# Install dependencies
 RUN npm ci
 
-# Copy source code
+# Copy source code (will be overridden by volumes)
 COPY . .
 
-# Expose port for Vite dev server
-EXPOSE 8080
+# Expose Vite dev server port
+EXPOSE 5173
 
-# Health check sin curl (usa Node para hacer una petición HTTP)
+# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "const http=require('http');const req=http.request({host:'localhost',port:8080,path:'/'},res=>{process.exit(res.statusCode===200?0:1)});req.on('error',()=>process.exit(1));req.end();"
+  CMD curl -f http://localhost:5173 || exit 1
 
-# Development mode with hot reload
-CMD ["npm", "run", "dev"]
-
-
+# Start Vite dev server with hot reload
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]

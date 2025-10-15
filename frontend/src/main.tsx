@@ -15,6 +15,7 @@ import DependentForm from './pages/DependentForm'
 import EditCollaborator from './pages/EditCollaborator'
 import AdminAudit from './pages/AdminAudit'
 import PanelRH from './pages/PanelRH'
+import PDFPreview from './pages/PDFPreview'
 // import PrivacyPolicy from './pages/PrivacyPolicy' // DESHABILITADO - usar modal
 
 const withLayout = (el: React.ReactNode) => <Layout>{el}</Layout>
@@ -30,6 +31,12 @@ const router = createBrowserRouter([
   {
     path: '/login',
     element: <LoginPage />
+  },
+  
+  // Ruta pública: Vista previa del PDF
+  {
+    path: '/pdf-preview',
+    element: <PDFPreview />
   },
   
   // Ruta de desarrollo: Sin autenticación
