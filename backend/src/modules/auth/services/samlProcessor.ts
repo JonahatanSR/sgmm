@@ -12,6 +12,7 @@ export interface SamlUserData {
   maternalLastName: string;
   fullName: string;
   domain: string;
+  employeeNumber?: string; // Número de empleado de Google Workspace
   nameId: string;
   sessionIndex: string;
   issuer: string;
@@ -210,6 +211,7 @@ export class SamlProcessor {
       maternalLastName: attributes.maternalLastName || '',
       fullName: fullName || attributes.email || '',
       domain: this.extractDomain(attributes.email || ''),
+      employeeNumber: attributes.employeeNumber || attributes.employee_number || attributes.employeeId || attributes.employee_id || '', // Buscar número de empleado
       nameId: assertion?.subject?.nameId || assertion?.subject?.['saml2:nameId'] || '',
       sessionIndex: assertion?.authnStatement?.sessionIndex || assertion?.authnStatement?.['saml2:sessionIndex'] || '',
       issuer: assertion?.issuer || assertion?.['saml2:issuer'] || '',
@@ -253,6 +255,9 @@ export class SamlProcessor {
         extractedAttributes.maternalLastName = surnames.maternal;
       } else if (name && name.includes('name')) {
         extractedAttributes.fullName = value;
+      } else if (name && (name.includes('employee') || name.includes('id') || name.includes('number'))) {
+        // Buscar número de empleado en diferentes formatos
+        extractedAttributes.employeeNumber = value;
       }
     }
     

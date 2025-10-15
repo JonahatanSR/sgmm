@@ -44,7 +44,7 @@ export default function DependentForm() {
     maternal_last_name: '',
     gender: 'M',
     birth_date: '',
-    relationship_type_id: relTypes?.[0]?.id ?? 1,
+    relationship_type_id: 1, // Default to first relationship type
     policy_start_date: new Date().toISOString(),
   }))
 
@@ -63,6 +63,16 @@ export default function DependentForm() {
       })
     }
   }, [existing])
+
+  // Update form when relationship types are loaded
+  useEffect(() => {
+    if (relTypes && relTypes.length > 0 && !isEdit) {
+      setForm(prev => ({
+        ...prev,
+        relationship_type_id: relTypes[0].id
+      }))
+    }
+  }, [relTypes, isEdit])
 
   const valid = useMemo(() => {
     return (
@@ -186,10 +196,19 @@ export default function DependentForm() {
           </div>
           <div>
             <label className="form-label">Parentesco</label>
-            <select value={Number(form.relationship_type_id)} onChange={e => setForm({ ...form, relationship_type_id: Number(e.target.value) })} className="form-control">
-              {(relTypes || []).map(r => (
-                <option key={r.id} value={r.id}>{r.name}</option>
-              ))}
+            <select 
+              value={Number(form.relationship_type_id)} 
+              onChange={e => setForm({ ...form, relationship_type_id: Number(e.target.value) })} 
+              className="form-control"
+              disabled={!relTypes || relTypes.length === 0}
+            >
+              {!relTypes || relTypes.length === 0 ? (
+                <option value="">Cargando tipos de parentesco...</option>
+              ) : (
+                relTypes.map(r => (
+                  <option key={r.id} value={r.id}>{r.name}</option>
+                ))
+              )}
             </select>
           </div>
 

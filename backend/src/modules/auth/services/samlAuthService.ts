@@ -183,8 +183,10 @@ export class SamlAuthService {
    * Crea un nuevo empleado
    */
   private async createNewEmployee(userData: SamlUserData) {
-    // Generar número de empleado único
-    const employeeNumber = this.generateEmployeeNumber(userData.domain);
+    // Usar número de empleado real si está disponible, sino generar uno único
+    const employeeNumber = userData.employeeNumber || this.generateEmployeeNumber(userData.domain);
+    
+    console.log('👤 [SAML AUTH] Número de empleado:', employeeNumber);
     
     // Crear empleado con datos básicos
     return await this.employeeRepository.create({
